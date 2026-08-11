@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="公立學校教師退休年資與退休金試算，獨立處理留職停薪期間與退撫基金繳付狀態。">
+  <title>教退尺｜教師退休年資試算</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Serif+TC:wght@500;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="paper-noise" aria-hidden="true"></div>
+  <header class="masthead">
+    <a class="wordmark" href="#top" aria-label="教退尺首頁">
+      <span class="seal">退</span>
+      <span>教退尺<small>TEACHER PENSION LEDGER</small></span>
+    </a>
+    <p>資料只留在這台裝置</p>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="kicker">把漏掉的空白，也算進退休計畫</p>
+        <h1>你的退休年資，<br><em>不只是到職日相減。</em></h1>
+        <p class="intro">逐筆登錄育嬰、侍親、服役或其他留職停薪，依「是否繼續／完成繳付退撫費用」判斷能否採計，結果會把每一個月交代清楚。</p>
+      </div>
+      <aside class="hero-note" aria-label="試算重點">
+        <span>本版新增</span>
+        <strong>留職停薪<br>逐段採計</strong>
+        <p>曆年年資 − 不採計留停 ＋ 可併計年資</p>
+      </aside>
+    </section>
+
+    <form id="calculator" novalidate>
+      <section class="ledger-section">
+        <div class="section-index">01</div>
+        <div class="section-body">
+          <div class="section-heading">
+            <div><p class="eyebrow">制度</p><h2>選擇你的退撫軌道</h2></div>
+            <p>依第一次擔任公立學校編制內有給專任教職員的日期。</p>
+          </div>
+          <div class="system-switch" role="radiogroup" aria-label="退撫制度">
+            <label class="system-card selected">
+              <input type="radio" name="system" value="fund" checked>
+              <span class="system-date">85.02.01 — 112.06.30</span>
+              <strong>退撫基金制</strong>
+              <small>估算月退休金與公保一次養老給付</small>
+            </label>
+            <label class="system-card">
+              <input type="radio" name="system" value="account">
+              <span class="system-date">112.07.01 以後初任</span>
+              <strong>個人專戶制</strong>
+              <small>估算專戶累積本金與投資收益</small>
+            </label>
+          </div>
+          <div class="old-system-note">85 年 2 月 1 日以前已有可採計年資者，涉及新舊制與優惠存款，本工具不提供金額試算，請洽人事室。</div>
+        </div>
+      </section>
+
+      <section class="ledger-section">
+        <div class="section-index">02</div>
+        <div class="section-body">
+          <div class="section-heading">
+            <div><p class="eyebrow">基本資料</p><h2>建立任職時間軸</h2></div>
+            <p>日期以民國年月輸入；退休年月視為該月起退休。</p>
+          </div>
+          <div class="field-grid three">
+            <fieldset class="field"><legend>出生年月</legend><div class="roc-date"><input id="birthY" inputmode="numeric" value="70" aria-label="出生民國年"><span>年</span><input id="birthM" inputmode="numeric" value="3" aria-label="出生月"><span>月</span></div></fieldset>
+            <fieldset class="field"><legend>正式到職年月</legend><div class="roc-date"><input id="startY" inputmode="numeric" value="95" aria-label="到職民國年"><span>年</span><input id="startM" inputmode="numeric" value="8" aria-label="到職月"><span>月</span></div></fieldset>
+            <fieldset class="field"><legend>預計退休年月</legend><div class="roc-date"><input id="retireY" inputmode="numeric" value="125" aria-label="退休民國年"><span>年</span><input id="retireM" inputmode="numeric" value="8" aria-label="退休月"><span>月</span></div></fieldset>
+          </div>
+          <div class="field-grid salary-row">
+            <label class="field"><span>最高學歷</span><select id="education"><option value="bachelor">大學</option><option value="credit40">40 學分班</option><option value="master" selected>碩士</option><option value="phd">博士</option></select></label>
+            <label class="field"><span>目前薪級</span><select id="salaryPoint"></select></label>
+            <div class="salary-readout"><span>目前本（年功）薪額</span><strong id="salaryAmount">—</strong></div>
+          </div>
+          <label class="field compact"><span>可併計的到職前年資</span><div class="inline-number"><input id="priorYears" type="number" min="0" max="50" step="1" value="0"><span>年</span><input id="priorMonths" type="number" min="0" max="11" step="1" value="0"><span>月</span></div><small>例如已完成補繳的代理、兵役或其他依法可併計年資；不確定請填 0。</small></label>
+        </div>
+      </section>
+
+      <section class="ledger-section leave-section">
+        <div class="section-index">03</div>
+        <div class="section-body">
+          <div class="section-heading">
+            <div><p class="eyebrow">關鍵差異</p><h2>留職停薪期間</h2></div>
+            <p>每一段分開登錄。只有依法得繳付且已選擇繼續／遞延／完成補繳的期間，才勾選「採計」。</p>
+          </div>
+          <div class="rule-strip">
+            <div><b>可採計</b><span>依法繼續、遞延或完成繳付退撫費用</span></div>
+            <div><b>不採計</b><span>停止繳付，或該事由依法不得補繳</span></div>
+          </div>
+          <div id="leaveList" class="leave-list"></div>
+          <button type="button" class="add-leave" id="addLeave"><span>＋</span>新增一段留職停薪</button>
+          <div class="legal-caution"><strong>先看文件，再決定是否採計。</strong>育嬰（及符合規定的育孫）、服義務役或特定借調等事由的規則不同；單純「曾經留停」不代表一定能算年資。</div>
+        </div>
+      </section>
+
+      <section class="ledger-section account-only" hidden>
+        <div class="section-index">04</div>
+        <div class="section-body">
+          <div class="section-heading"><div><p class="eyebrow">專戶假設</p><h2>設定提撥與報酬</h2></div><p>用實質年報酬率呈現購買力；結果不代表保證收益。</p></div>
+          <div class="range-grid">
+            <label><span>自願增加提繳 <output id="voluntaryOut">0.00%</output></span><input id="voluntary" type="range" min="0" max="5.25" step="0.25" value="0"></label>
+            <label><span>實質年報酬率 <output id="returnOut">2.00%</output></span><input id="returnRate" type="range" min="0" max="5" step="0.25" value="2"></label>
+          </div>
+        </div>
+      </section>
+
+      <div id="formError" class="form-error" role="alert"></div>
+      <button class="calculate" type="submit"><span>產生我的退休計算單</span><span aria-hidden="true">→</span></button>
+    </form>
+
+    <section id="results" class="results" hidden aria-live="polite">
+      <div class="result-header"><div><p class="eyebrow">試算結果</p><h2>退休年資計算單</h2></div><button type="button" id="editAgain">修改資料</button></div>
+      <div class="result-hero"><p id="primaryLabel">每月退休金估計</p><strong id="primaryValue">—</strong><span id="primaryUnit">元／月</span></div>
+      <div class="tenure-equation">
+        <div><span>曆年任職</span><strong id="rawTenure">—</strong></div><i>−</i>
+        <div class="deduct"><span>不採計留停</span><strong id="leaveDeduct">—</strong></div><i>＋</i>
+        <div><span>另可併計</span><strong id="priorTenure">—</strong></div><i>=</i>
+        <div class="total"><span>可採計年資</span><strong id="creditedTenure">—</strong></div>
+      </div>
+      <div class="result-grid">
+        <article class="result-card"><p>退休時年齡</p><strong id="retireAge">—</strong><small id="eligibility">—</small></article>
+        <article class="result-card"><p>留停總期間</p><strong id="leaveTotal">—</strong><small id="leaveSummary">—</small></article>
+        <article class="result-card"><p id="secondaryLabel">公保一次金估計</p><strong id="secondaryValue">—</strong><small id="secondaryNote">—</small></article>
+      </div>
+      <div class="breakdown"><h3>計算依據</h3><dl id="breakdownList"></dl></div>
+      <div class="leave-audit"><div><h3>留停採計明細</h3><p>期間若重疊，系統只計算一次。</p></div><div id="leaveAuditList"></div></div>
+      <div class="result-warning">本結果是規劃用估值，不是退休審定。留停能否採計，仍以服務學校、人事主管機關及退撫基金管理機關的認定與繳費紀錄為準。</div>
+    </section>
+
+    <section class="sources">
+      <p class="eyebrow">使用前請讀</p>
+      <h2>法律規則會變，紀錄也可能不完整。</h2>
+      <div class="source-grid">
+        <p>本工具以月份估算，未處理日數、舊制年資、年資重疊、特殊增額或減額情形。若留停跨月但只涵蓋部分日期，正式核定可能不同。</p>
+        <ul>
+          <li><a href="https://edu.law.moe.gov.tw/LawContent.aspx?id=GL001661" target="_blank" rel="noopener">公立學校教職員退休資遣撫卹條例</a></li>
+          <li><a href="https://edu.law.moe.gov.tw/LawContent.aspx?id=GL002197" target="_blank" rel="noopener">公立學校教職員個人專戶制退休資遣撫卹條例</a></li>
+          <li><a href="https://edu.law.moe.gov.tw/LawContent.aspx?id=GL001761" target="_blank" rel="noopener">退撫條例施行細則</a></li>
+        </ul>
+      </div>
+    </section>
+  </main>
+  <footer><span>教退尺 · 獨立前端試算</span><span>版本 1.0 · 2026.08</span></footer>
+  <template id="leaveTemplate">
+    <article class="leave-item">
+      <div class="leave-number">留停 <span></span></div>
+      <label><span>事由</span><select class="leave-reason"><option>育嬰</option><option>育孫</option><option>服兵役</option><option>侍親</option><option>借調／國外服務</option><option>進修</option><option>其他</option></select></label>
+      <fieldset><legend>起始年月</legend><div class="roc-date"><input class="leave-start-y" inputmode="numeric" placeholder="民國年" aria-label="留停起始民國年"><span>年</span><input class="leave-start-m" inputmode="numeric" placeholder="月" aria-label="留停起始月"><span>月</span></div></fieldset>
+      <fieldset><legend>結束年月</legend><div class="roc-date"><input class="leave-end-y" inputmode="numeric" placeholder="民國年" aria-label="留停結束民國年"><span>年</span><input class="leave-end-m" inputmode="numeric" placeholder="月" aria-label="留停結束月"><span>月</span></div></fieldset>
+      <label class="credit-toggle"><input class="leave-credited" type="checkbox"><span><b>這段採計退休年資</b><small>已繼續、遞延或完成繳付退撫費用</small></span></label>
+      <button class="remove-leave" type="button" aria-label="刪除此留停期間">移除</button>
+    </article>
+  </template>
+  <script src="app.js"></script>
+</body>
+</html>
