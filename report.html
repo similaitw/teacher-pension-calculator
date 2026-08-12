@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f2efe6">
+  <meta name="description" content="教師退休試算資料欄位、計算規則與可列印退休規劃報表。">
+  <title>資料說明與報表｜教退尺</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Serif+TC:wght@500;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="report.css">
+</head>
+<body class="report-page">
+  <div class="paper-noise" aria-hidden="true"></div>
+  <header class="masthead no-print">
+    <a class="wordmark" href="index.html" aria-label="教退尺首頁"><span class="seal">退</span><span>教退尺<small>TEACHER PENSION LEDGER</small></span></a>
+    <nav class="site-nav" aria-label="主要導覽"><a href="index.html">退休試算</a><a class="active" href="report.html">資料說明與報表</a></nav>
+  </header>
+
+  <main class="report-main">
+    <section class="report-intro no-print">
+      <p class="kicker">DATA DICTIONARY & PENSION REPORT</p>
+      <h1>每一個數字，<br><em>都說得清楚。</em></h1>
+      <p>先理解輸入資料如何影響結果，再把最近一次試算整理成可列印、可另存 PDF 的退休規劃報表。</p>
+      <div class="report-jump"><a href="#dictionary">查看資料說明</a><a class="primary" href="#generatedReport">前往我的報表</a></div>
+    </section>
+
+    <section id="dictionary" class="dictionary no-print">
+      <div class="dictionary-heading"><div><p class="eyebrow">資料字典</p><h2>所有欄位與計算規則</h2></div><p>「輸入資料」決定時間軸；「制度參數」決定公式；「核定文件」永遠優先於系統推估。</p></div>
+      <div class="dictionary-grid">
+        <article><span class="dict-no">01</span><h3>退撫制度</h3><p>以初任公立學校編制內有給專任教職員日期判斷。85/2/1 至 112/6/30 通常適用退撫基金制；112/7/1 後初任通常為個人專戶制。</p><small>85/2/1 前已有年資者涉及新舊制，本工具不試算。</small></article>
+        <article><span class="dict-no">02</span><h3>出生、到職與退休年月</h3><p>出生年月用來計算退休年齡；到職至退休的月數形成曆年任職期間。工具以整月估算，不處理特定日期的日數差。</p><div class="formula">退休年齡＝退休年月－出生年月</div></article>
+        <article><span class="dict-no">03</span><h3>初任學歷與目前薪級</h3><p>初任學歷決定起敘基準；目前薪級是推回與推估整段薪級路徑的錨點。薪點對照本（年功）薪額，不包含專業加給、導師費或主管加給。</p></article>
+        <article><span class="dict-no">04</span><h3>碩士／博士改敘</h3><p>採「核定改敘生效年月」。大學升碩士提敘 3 級、大學直升博士 5 級、碩士升博士 2 級；若有敘薪通知書，應直接使用核定後薪點。</p><div class="formula">碩士年功薪上限 650｜博士 680</div></article>
+        <article><span class="dict-no">05</span><h3>留職停薪</h3><p>每段期間必須判斷是否繼續、遞延或完成繳付退撫費用。已繳付才勾選採計；未繳付或依法不得補繳者，從退休年資及專戶提撥月數扣除。</p><small>重疊期間只扣一次。</small></article>
+        <article><span class="dict-no">06</span><h3>另可併計年資</h3><p>到職前代理、兵役或其他年資，只有經主管機關認定並完成應辦程序後才能加入。沒有核定資料時應填 0。</p></article>
+        <article><span class="dict-no">07</span><h3>可採計退休年資</h3><p>這是退休條件、退休金公式與公保給付的核心年資。網站以月數運算，再換成年、月顯示。</p><div class="formula">曆年任職－不採計留停＋另可併計</div></article>
+        <article><span class="dict-no">08</span><h3>退撫基金制月退休金</h3><p>依最後若干年平均本（年功）薪、可採計年資與所得替代率上限估算，取法定公式值與上限值較低者；未達起支年齡時再反映提前減額。</p></article>
+        <article><span class="dict-no">09</span><h3>個人專戶制</h3><p>依每月薪級，按本（年功）薪額加一倍乘以法定 15% 與自願增加提繳累積。報酬率是假設值，不是保證收益。</p><div class="formula">每月提撥＝薪額 × 2 × 提撥率</div></article>
+        <article><span class="dict-no">10</span><h3>公保一次養老給付</h3><p>目前報表以退休時本（年功）薪額乘以估計給付月數呈現。公保實際保俸、年資與請領方式仍以臺銀公保部及主管機關核定為準。</p></article>
+      </div>
+      <aside class="dictionary-warning"><strong>怎麼使用最準？</strong><span>準備敘薪通知書、學歷改敘函、留停核定函、退撫費用繳付證明與可併計年資核定資料，再逐項核對。</span></aside>
+    </section>
+
+    <section id="generatedReport" class="generated-report">
+      <div id="emptyReport" class="empty-report no-print" hidden><span>尚無資料</span><h2>請先完成一次退休試算</h2><p>報表只讀取這台裝置最近一次成功試算，不會上傳個人資料。</p><a href="index.html">回到退休試算</a></div>
+      <article id="reportSheet" class="report-sheet" hidden>
+        <header class="sheet-head"><div><p>TEACHER PENSION PLANNING REPORT</p><h2>教師退休規劃報表</h2></div><div class="sheet-mark"><span>教退尺</span><small id="reportDate"></small></div></header>
+        <section class="sheet-summary"><div><span id="reportPrimaryLabel"></span><strong id="reportPrimaryValue"></strong><small id="reportPrimaryUnit"></small></div><div><span id="reportSecondaryLabel"></span><strong id="reportSecondaryValue"></strong><small id="reportSecondaryNote"></small></div></section>
+        <section class="sheet-block"><h3>一、基本資料</h3><div id="basicData" class="sheet-data-grid"></div></section>
+        <section class="sheet-block"><h3>二、年資計算</h3><div id="tenureData" class="sheet-equation"></div></section>
+        <section class="sheet-block"><h3>三、學歷與薪級時間軸</h3><div id="educationData" class="sheet-table"></div></section>
+        <section class="sheet-block"><h3>四、留職停薪採計明細</h3><div id="leaveData" class="sheet-table"></div></section>
+        <section class="sheet-block"><h3>五、計算明細</h3><div id="calculationData" class="sheet-table"></div></section>
+        <section class="sheet-block conclusion"><h3>六、判讀與限制</h3><p id="eligibilityText"></p><p>本報表為規劃用估值，不是退休審定函。實際年資、薪級、保險年資、退撫給與及留停採計，以服務學校、人事主管機關、退撫基金管理機關及公保承保機關核定為準。</p></section>
+        <footer class="sheet-footer"><span>資料保存在本機瀏覽器</span><span>教退尺｜非正式審定</span></footer>
+      </article>
+      <div id="reportTools" class="report-tools no-print" hidden><button id="printReport" type="button">列印／另存 PDF</button><a href="index.html">修改試算資料</a></div>
+    </section>
+
+    <section class="report-sources no-print"><p class="eyebrow">法規來源</p><div><a href="https://edu.law.moe.gov.tw/LawContent.aspx?id=GL001661" target="_blank" rel="noopener">退撫條例</a><a href="https://edu.law.moe.gov.tw/LawContent.aspx?id=GL002197" target="_blank" rel="noopener">個人專戶制退撫條例</a><a href="https://edu.law.moe.gov.tw/LawContent.aspx?id=GL001446" target="_blank" rel="noopener">教師待遇條例</a><a href="https://edu.law.moe.gov.tw/LawContent.aspx?id=GL001518" target="_blank" rel="noopener">教師待遇條例施行細則</a></div></section>
+  </main>
+  <script src="report.js"></script>
+</body>
+</html>

@@ -118,6 +118,16 @@ function calculate(e){
       $('primaryLabel').textContent='退休時個人專戶估計';$('primaryValue').textContent=fmt(acc.bal);$('primaryUnit').textContent='元';$('secondaryLabel').textContent='其中預估投資收益';$('secondaryValue').textContent=fmt(acc.bal-acc.principal)+' 元';$('secondaryNote').textContent=`實質年報酬 ${(ret*100).toFixed(2)}%`;$('eligibility').textContent=years>=25||(years>=5&&age>=60)?'符合一般自願退休年資／年齡條件':'可能尚未符合一般自願退休條件';
       addLine('初任學歷',EDU[initial].label);events.forEach(x=>addLine(`民國 ${x.y}/${x.m} 改敘${EDU[x.target].label}`,x.point?`核定 ${x.point} 薪點`:`依法提敘 ${x.steps} 級（系統推算）`));addLine('退休時預估薪點',`${timeline.points[timeline.points.length-1]}（${fmt(last)} 元）`);addLine('實際提撥月數',`${acc.paidMonths} 個月`);addLine('法定＋自願提撥率',`${((.15+vol)*100).toFixed(2)}%`);addLine('累積提撥本金',`${fmt(acc.principal)} 元`);addLine('預估投資收益',`${fmt(acc.bal-acc.principal)} 元`);
     }
+    const report={
+      version:2,generatedAt:new Date().toISOString(),system,systemLabel:system==='fund'?'退撫基金制':'個人專戶制',
+      input:{birth,start,retire,initialEducation:EDU[initial].label,currentPoint,currentSalary:SALARY[currentPoint],priorMonths:prior,voluntaryRate:Number($('voluntary').value)/100,returnRate:Number($('returnRate').value)/100},
+      educationEvents:events.map(x=>({y:x.y,m:x.m,target:EDU[x.target].label,steps:x.steps,point:x.point})),
+      leaves:leaves.map(x=>({reason:x.reason,sy:x.sy,sm:x.sm,ey:x.ey,em:x.em,credited:x.credited})),
+      tenure:{rawMonths:raw,uncreditedLeaveMonths:uncredited,priorMonths:prior,creditedMonths:credited,ageMonths:r-b,allLeaveMonths:allLeave},
+      result:{primaryLabel:$('primaryLabel').textContent,primaryValue:$('primaryValue').textContent,primaryUnit:$('primaryUnit').textContent,secondaryLabel:$('secondaryLabel').textContent,secondaryValue:$('secondaryValue').textContent,secondaryNote:$('secondaryNote').textContent,eligibility:$('eligibility').textContent,retirementPoint:timeline.points[timeline.points.length-1],retirementSalary:last},
+      breakdown:Array.from(document.querySelectorAll('#breakdownList div')).map(row=>({label:row.querySelector('dt').textContent,value:row.querySelector('dd').textContent}))
+    };
+    try{localStorage.setItem('teacherPensionReport',JSON.stringify(report));}catch(storageError){console.warn('無法儲存本機報表',storageError);}
     $('results').hidden=false;$('results').scrollIntoView({behavior:'smooth',block:'start'});
   }catch(err){$('formError').textContent=err.message;$('formError').scrollIntoView({behavior:'smooth',block:'center'});}
 }
