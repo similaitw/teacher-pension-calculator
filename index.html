@@ -75,13 +75,13 @@
             <p>日期以民國年月輸入；退休年月視為該月起退休。</p>
           </div>
           <div class="field-grid three">
-            <fieldset class="field"><legend>出生年月</legend><div class="roc-date"><input id="birthY" inputmode="numeric" value="70" aria-label="出生民國年"><span>年</span><input id="birthM" inputmode="numeric" value="3" aria-label="出生月"><span>月</span></div></fieldset>
-            <fieldset class="field"><legend>正式到職年月</legend><div class="roc-date"><input id="startY" inputmode="numeric" value="95" aria-label="到職民國年"><span>年</span><input id="startM" inputmode="numeric" value="8" aria-label="到職月"><span>月</span></div></fieldset>
-            <fieldset class="field"><legend>預計退休年月</legend><div class="roc-date"><input id="retireY" inputmode="numeric" value="125" aria-label="退休民國年"><span>年</span><input id="retireM" inputmode="numeric" value="8" aria-label="退休月"><span>月</span></div></fieldset>
+            <fieldset class="field"><legend>出生年月</legend><div class="roc-date"><input id="birthY" inputmode="numeric" value="65" aria-label="出生民國年"><span>年</span><input id="birthM" inputmode="numeric" value="12" aria-label="出生月"><span>月</span></div></fieldset>
+            <fieldset class="field"><legend>正式到職年月</legend><div class="roc-date"><input id="startY" inputmode="numeric" value="88" aria-label="到職民國年"><span>年</span><input id="startM" inputmode="numeric" value="8" aria-label="到職月"><span>月</span></div></fieldset>
+            <fieldset class="field"><legend>預計退休年月</legend><div class="roc-date"><input id="retireY" inputmode="numeric" value="124" aria-label="退休民國年"><span>年</span><input id="retireM" inputmode="numeric" value="8" aria-label="退休月"><span>月</span></div></fieldset>
           </div>
           <div class="field-grid salary-row">
             <label class="field"><span>初任時學歷</span><select id="education"><option value="bachelor" selected>大學</option><option value="credit40">40 學分班</option><option value="master">碩士</option><option value="phd">博士</option></select></label>
-            <label class="field"><span>目前薪級</span><select id="salaryPoint"></select></label>
+            <label class="field"><span>目前薪級</span><select id="salaryPoint" data-default="650"></select></label>
             <div class="salary-readout"><span>目前本（年功）薪額</span><strong id="salaryAmount">—</strong></div>
           </div>
           <div class="education-panel">
@@ -137,8 +137,8 @@
           <div id="retirementModeGroup" class="choice-group fund-only">
             <span class="choice-label">退休／月退起領情境</span>
             <div class="mode-switch" role="radiogroup" aria-label="退休與月退休金起領情境">
-              <label class="choice-card"><input type="radio" name="retirementMode" value="full"><strong>一般全額</strong><small>自願退休且已達月退起支年齡</small></label>
-              <label class="choice-card selected"><input type="radio" name="retirementMode" value="reduced" checked><strong>減額月退</strong><small>最多提前 5 年，每年減 4%</small></label>
+              <label class="choice-card selected"><input type="radio" name="retirementMode" value="full" checked><strong>一般全額</strong><small>自願退休且已達月退起支年齡</small></label>
+              <label class="choice-card"><input type="radio" name="retirementMode" value="reduced"><strong>減額月退</strong><small>最多提前 5 年，每年減 4%</small></label>
               <label class="choice-card"><input type="radio" name="retirementMode" value="deferred"><strong>展期月退</strong><small>退休後延至起支年齡再領</small></label>
               <label class="choice-card"><input type="radio" name="retirementMode" value="mandatory"><strong>屆齡退休</strong><small>一般為年滿 65 歲</small></label>
             </div>

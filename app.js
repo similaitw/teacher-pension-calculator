@@ -14,7 +14,7 @@ const ymText=months=>`${Math.floor(months/12)} 年 ${months%12} 月`;
 let leaveSeq=0,educationSeq=0;
 
 function fillSalaryPoints(){
-  const previous=Number($('salaryPoint').value)||450;
+  const previous=Number($('salaryPoint').value)||Number($('salaryPoint').dataset.default)||450;
   $('salaryPoint').innerHTML='';
   LADDER.slice().reverse().forEach(p=>{
     const o=document.createElement('option');o.value=p;o.textContent=`${p}（${fmt(SALARY[p])} 元）`;$('salaryPoint').append(o);
@@ -217,4 +217,4 @@ $('voluntary').addEventListener('input',e=>$('voluntaryOut').textContent=Number(
 let liveTimer;function scheduleLive(){clearTimeout(liveTimer);$('liveBar').classList.add('is-updating');liveTimer=setTimeout(()=>calculate(null,{scroll:false}),180);}
 $('calculator').addEventListener('submit',e=>calculate(e,{scroll:true}));$('calculator').addEventListener('input',scheduleLive);$('calculator').addEventListener('change',scheduleLive);$('editAgain').addEventListener('click',()=>$('calculator').scrollIntoView({behavior:'smooth'}));
 document.addEventListener('input',e=>{if(e.target.matches('input[inputmode=numeric]'))e.target.value=e.target.value.replace(/\D/g,'');});
-fillSalaryPoints();addLeave({reason:'育嬰',sy:108,sm:8,ey:110,em:7,credited:false});updateChoiceUI();calculate(null,{scroll:false});
+fillSalaryPoints();addEducation({target:'master',y:93,m:8});addLeave({reason:'進修',sy:91,sm:8,ey:93,em:7,credited:false});updateChoiceUI();calculate(null,{scroll:false});
