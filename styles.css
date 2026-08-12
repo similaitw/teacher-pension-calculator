@@ -6,6 +6,18 @@ body{overflow-x:clip}
 @media(max-width:640px){main{padding:0 16px}.masthead{padding:18px 16px}.masthead p{display:none}.hero{padding:52px 0}.hero h1{font-size:43px}.ledger-section{display:block;padding:38px 0}.section-index{margin-bottom:12px}.section-heading{display:block}.section-heading>p{margin-top:10px}.system-switch,.field-grid.three,.salary-row,.range-grid,.source-grid{grid-template-columns:1fr}.leave-item{grid-template-columns:1fr}.rule-strip{grid-template-columns:1fr}.rule-strip div+div{border-left:0;border-top:1px solid var(--line)}.form-error{margin-left:0}.calculate{margin-left:0;width:100%}.results{padding:24px 18px}.tenure-equation{grid-template-columns:1fr 1fr}.tenure-equation i{display:none}.result-grid{grid-template-columns:1fr}.source-grid{gap:18px}.sources{padding-inline:0}.audit-row{grid-template-columns:1fr 1fr}.audit-row span:last-child{grid-column:1/-1;text-align:left}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
 
+/* Education reclassification timeline */
+.education-panel{margin-top:24px;padding:22px;border:1px solid rgba(36,76,60,.2);border-radius:var(--radius-lg);background:rgba(232,238,233,.55)}
+.subsection-heading{display:flex;align-items:end;justify-content:space-between;gap:24px;margin-bottom:16px}.subsection-heading h3{font-size:20px;margin:2px 0}.subsection-heading>p{max-width:430px;margin:0;color:var(--muted);font-size:11px}
+.education-rule{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.education-rule span{padding:7px 10px;border-radius:999px;background:#fff;border:1px solid #d7dfd9;font:500 10px var(--mono);color:var(--muted)}.education-rule b{color:var(--forest)}
+.education-list{display:grid;gap:10px}.education-item{position:relative;display:grid;grid-template-columns:72px 1fr 1.35fr 1.45fr auto;align-items:end;gap:12px;padding:16px;border:1px solid #d4ddd6;border-radius:16px;background:#fff}.education-number{align-self:center;font:600 11px var(--mono);color:var(--forest)}
+.add-education{width:100%;min-height:48px;margin-top:10px;border:1px dashed #8ba194;border-radius:14px;background:rgba(255,255,255,.65);color:var(--forest);font:bold 14px var(--serif);cursor:pointer}.add-education span{font:500 18px var(--mono);margin-right:8px}.add-education:hover{background:#fff}
+.remove-education{border:0;background:none;color:var(--red);font-family:var(--serif);cursor:pointer;padding:10px 0}.education-hint{margin:11px 2px 0;color:var(--muted);font-size:10.5px}
+@media(max-width:900px){.education-item{grid-template-columns:1fr 1fr}.education-number{grid-column:1/-1}}
+@media(max-width:640px){
+  .education-panel{margin-top:16px;padding:15px;border-radius:18px}.subsection-heading{display:block;margin-bottom:14px}.subsection-heading h3{font-size:19px}.subsection-heading>p{margin-top:6px;line-height:1.6}.education-rule{display:grid;grid-template-columns:1fr;gap:6px}.education-rule span{border-radius:10px;padding:8px 10px}.education-item{grid-template-columns:1fr;padding:15px;border-radius:16px;gap:12px;box-shadow:0 7px 18px rgba(23,37,31,.045)}.education-number{display:flex;justify-content:space-between}.education-number::after{content:"薪級節點";font:500 9px var(--mono);letter-spacing:.08em;color:#9b968b}.remove-education{width:100%;border:1px solid #ecd5cf;border-radius:12px;background:#fbefec;padding:11px;font-weight:700}.education-hint{line-height:1.65}
+}
+
 /* Rounded ledger — tactile cards with a mobile-first finish */
 :root{--radius-xl:28px;--radius-lg:20px;--radius-md:14px;--soft-shadow:0 12px 32px rgba(23,37,31,.075);--lift-shadow:0 18px 44px rgba(23,37,31,.12)}
 input,select{border-radius:12px;min-height:46px;transition:border-color .18s,box-shadow .18s,background .18s}

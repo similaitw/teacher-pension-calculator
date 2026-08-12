@@ -74,9 +74,23 @@
             <fieldset class="field"><legend>預計退休年月</legend><div class="roc-date"><input id="retireY" inputmode="numeric" value="125" aria-label="退休民國年"><span>年</span><input id="retireM" inputmode="numeric" value="8" aria-label="退休月"><span>月</span></div></fieldset>
           </div>
           <div class="field-grid salary-row">
-            <label class="field"><span>最高學歷</span><select id="education"><option value="bachelor">大學</option><option value="credit40">40 學分班</option><option value="master" selected>碩士</option><option value="phd">博士</option></select></label>
+            <label class="field"><span>初任時學歷</span><select id="education"><option value="bachelor" selected>大學</option><option value="credit40">40 學分班</option><option value="master">碩士</option><option value="phd">博士</option></select></label>
             <label class="field"><span>目前薪級</span><select id="salaryPoint"></select></label>
             <div class="salary-readout"><span>目前本（年功）薪額</span><strong id="salaryAmount">—</strong></div>
+          </div>
+          <div class="education-panel">
+            <div class="subsection-heading">
+              <div><p class="eyebrow">在職進修</p><h3>學歷改敘時間軸</h3></div>
+              <p>填「核定改敘生效年月」，不是只有畢業年月。若敘薪通知書有核定薪點，直接填入最準。</p>
+            </div>
+            <div class="education-rule">
+              <span>大學 → 碩士 <b>＋3 級</b></span>
+              <span>大學 → 博士 <b>＋5 級</b></span>
+              <span>碩士 → 博士 <b>＋2 級</b></span>
+            </div>
+            <div id="educationList" class="education-list"></div>
+            <button type="button" class="add-education" id="addEducation"><span>＋</span>新增碩士／博士改敘</button>
+            <p class="education-hint">改敘當下受新學歷最高本薪限制；之後再依考核晉至年功薪上限。碩士最高年功薪 650、博士 680。</p>
           </div>
           <label class="field compact"><span>可併計的到職前年資</span><div class="inline-number"><input id="priorYears" type="number" min="0" max="50" step="1" value="0"><span>年</span><input id="priorMonths" type="number" min="0" max="11" step="1" value="0"><span>月</span></div><small>例如已完成補繳的代理、兵役或其他依法可併計年資；不確定請填 0。</small></label>
         </div>
@@ -142,6 +156,8 @@
           <li><a href="https://edu.law.moe.gov.tw/LawContent.aspx?id=GL001661" target="_blank" rel="noopener">公立學校教職員退休資遣撫卹條例</a></li>
           <li><a href="https://edu.law.moe.gov.tw/LawContent.aspx?id=GL002197" target="_blank" rel="noopener">公立學校教職員個人專戶制退休資遣撫卹條例</a></li>
           <li><a href="https://edu.law.moe.gov.tw/LawContent.aspx?id=GL001761" target="_blank" rel="noopener">退撫條例施行細則</a></li>
+          <li><a href="https://edu.law.moe.gov.tw/LawContent.aspx?id=GL001446" target="_blank" rel="noopener">教師待遇條例（學歷改敘）</a></li>
+          <li><a href="https://edu.law.moe.gov.tw/LawContent.aspx?id=GL001518" target="_blank" rel="noopener">教師待遇條例施行細則</a></li>
         </ul>
       </div>
     </section>
@@ -155,6 +171,15 @@
       <fieldset><legend>結束年月</legend><div class="roc-date"><input class="leave-end-y" inputmode="numeric" placeholder="民國年" aria-label="留停結束民國年"><span>年</span><input class="leave-end-m" inputmode="numeric" placeholder="月" aria-label="留停結束月"><span>月</span></div></fieldset>
       <label class="credit-toggle"><input class="leave-credited" type="checkbox"><span><b>這段採計退休年資</b><small>已繼續、遞延或完成繳付退撫費用</small></span></label>
       <button class="remove-leave" type="button" aria-label="刪除此留停期間">移除</button>
+    </article>
+  </template>
+  <template id="educationTemplate">
+    <article class="education-item">
+      <div class="education-number">改敘 <span></span></div>
+      <label><span>取得學歷</span><select class="education-target"><option value="master">碩士</option><option value="phd">博士</option></select></label>
+      <fieldset><legend>改敘生效年月</legend><div class="roc-date"><input class="education-y" inputmode="numeric" placeholder="民國年" aria-label="改敘生效民國年"><span>年</span><input class="education-m" inputmode="numeric" placeholder="月" aria-label="改敘生效月"><span>月</span></div></fieldset>
+      <label><span>核定改敘後薪點</span><select class="education-point"><option value="">不清楚，由系統依法推算</option></select></label>
+      <button class="remove-education" type="button" aria-label="刪除此學歷改敘">移除</button>
     </article>
   </template>
   <script src="app.js"></script>
