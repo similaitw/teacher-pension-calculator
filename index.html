@@ -113,8 +113,36 @@
         </div>
       </section>
 
-      <section class="ledger-section account-only" hidden>
+      <section class="ledger-section choice-section">
         <div class="section-index">04</div>
+        <div class="section-body">
+          <div class="section-heading">
+            <div><p class="eyebrow">請領選擇</p><h2>選擇退休金領法</h2></div>
+            <p>「領法」決定一次金與月退休金的比例；「情境」決定月退休金何時開始及是否減額。</p>
+          </div>
+          <div class="choice-group">
+            <span class="choice-label">退休金種類</span>
+            <div class="benefit-switch" role="radiogroup" aria-label="退休金種類">
+              <label class="choice-card"><input type="radio" name="benefitType" value="lump"><strong>一次退</strong><small>全額一次退休金</small></label>
+              <label class="choice-card"><input type="radio" name="benefitType" value="half"><strong>半月退</strong><small>二分之一次退＋二分之一月退</small></label>
+              <label class="choice-card selected"><input type="radio" name="benefitType" value="monthly" checked><strong>月退</strong><small>全額月退休金</small></label>
+            </div>
+          </div>
+          <div id="retirementModeGroup" class="choice-group fund-only">
+            <span class="choice-label">退休／月退起領情境</span>
+            <div class="mode-switch" role="radiogroup" aria-label="退休與月退休金起領情境">
+              <label class="choice-card"><input type="radio" name="retirementMode" value="full"><strong>一般全額</strong><small>自願退休且已達月退起支年齡</small></label>
+              <label class="choice-card selected"><input type="radio" name="retirementMode" value="reduced" checked><strong>減額月退</strong><small>最多提前 5 年，每年減 4%</small></label>
+              <label class="choice-card"><input type="radio" name="retirementMode" value="deferred"><strong>展期月退</strong><small>退休後延至起支年齡再領</small></label>
+              <label class="choice-card"><input type="radio" name="retirementMode" value="mandatory"><strong>屆齡退休</strong><small>一般為年滿 65 歲</small></label>
+            </div>
+          </div>
+          <div id="choiceHint" class="legal-caution">高級中等以下學校校長及教師的一般全額月退休金起支年齡以 58 歲估算；特殊身分、命令退休及原住民規定未納入自動判斷。</div>
+        </div>
+      </section>
+
+      <section class="ledger-section account-only" hidden>
+        <div class="section-index">05</div>
         <div class="section-body">
           <div class="section-heading"><div><p class="eyebrow">專戶假設</p><h2>設定提撥與報酬</h2></div><p>用實質年報酬率呈現購買力；結果不代表保證收益。</p></div>
           <div class="range-grid">
@@ -152,7 +180,7 @@
       <p class="eyebrow">使用前請讀</p>
       <h2>法律規則會變，紀錄也可能不完整。</h2>
       <div class="source-grid">
-        <p>本工具以月份估算，未處理日數、舊制年資、年資重疊、特殊增額或減額情形。若留停跨月但只涵蓋部分日期，正式核定可能不同。</p>
+        <p>本工具以月份估算，已納入一般減額、展期與屆齡情境；未處理日數、舊制年資、年資重疊、特殊身分或因公命令退休。若留停跨月但只涵蓋部分日期，正式核定可能不同。</p>
         <ul>
           <li><a href="https://edu.law.moe.gov.tw/LawContent.aspx?id=GL001661" target="_blank" rel="noopener">公立學校教職員退休資遣撫卹條例</a></li>
           <li><a href="https://edu.law.moe.gov.tw/LawContent.aspx?id=GL002197" target="_blank" rel="noopener">公立學校教職員個人專戶制退休資遣撫卹條例</a></li>
@@ -163,7 +191,7 @@
       </div>
     </section>
   </main>
-  <footer><span>教退尺 · 獨立前端試算</span><span>版本 1.0 · 2026.08</span></footer>
+  <footer><span>教退尺 · 獨立前端試算</span><span>版本 1.1 · 2026.08</span></footer>
   <template id="leaveTemplate">
     <article class="leave-item">
       <div class="leave-number">留停 <span></span></div>
