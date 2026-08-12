@@ -1,4 +1,5 @@
 const reportStoreKey='teacherPensionReport';
+const reportSalary={190:25050,200:25820,210:26580,220:27350,230:28120,245:29270,260:30410,275:31560,290:32710,310:33860,330:35010,350:36160,370:37310,390:38460,410:39610,430:40760,450:41900,475:44970,500:46500,525:48030,550:49560,575:51100,600:52630,625:54160,650:55690,680:57220};
 const q=id=>document.getElementById(id);
 const monthsText=n=>`${Math.floor(n/12)} 年 ${n%12} 月`;
 const rocText=d=>`民國 ${d.y} 年 ${d.m} 月`;
@@ -16,6 +17,7 @@ function renderReport(data){
   const edu=q('educationData');addRow(edu,['時間','學歷／事件','薪級結果'],'header');addRow(edu,[rocText(data.input.start),'初任 '+data.input.initialEducation,'依初任基準']);data.educationEvents.forEach(x=>addRow(edu,[`民國 ${x.y}/${x.m}`,`改敘${x.target}`,x.point?`核定 ${x.point} 薪點`:`提敘 ${x.steps} 級`]));addRow(edu,[rocText(data.input.retire),'退休時預估',`${data.result.retirementPoint}（${Number(data.result.retirementSalary).toLocaleString('zh-TW')} 元）`]);
   const leave=q('leaveData');addRow(leave,['事由','期間','退休年資'],'header');if(!data.leaves.length)addRow(leave,['無','未登錄留職停薪','—']);else data.leaves.forEach(x=>addRow(leave,[x.reason,`民國 ${x.sy}/${x.sm}－${x.ey}/${x.em}`,x.credited?'採計（已繳付）':'不採計（扣除）']));
   const calc=q('calculationData');data.breakdown.forEach(x=>addRow(calc,[x.label,x.value],'single'));
+  const salaryTimeline=q('salaryTimelineData');addRow(salaryTimeline,['民國年度','涵蓋月數','薪點／期末薪額'],'header');(data.salaryTimeline||[]).forEach(x=>addRow(salaryTimeline,[`${x.y} 年`,`${x.months} 個月`,`${x.first===x.last?x.first:`${x.first} → ${x.last}`}｜${Number(reportSalary[x.last]).toLocaleString('zh-TW')} 元`]));
   q('eligibilityText').textContent=data.result.eligibility;
 }
 

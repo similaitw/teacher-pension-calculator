@@ -39,6 +39,7 @@ input,select{border-radius:12px;min-height:46px;transition:border-color .18s,box
 .result-grid{gap:12px;background:transparent}
 .result-card{border:1px solid var(--line);border-radius:var(--radius-lg);box-shadow:0 5px 16px rgba(23,37,31,.035)}
 .result-warning{border-radius:var(--radius-md)}
+.salary-audit{margin-top:18px;border:1px solid var(--line);border-radius:18px;padding:0;background:#fff}.salary-audit summary{cursor:pointer;padding:15px 18px;font-weight:700;font-size:13px;list-style:none}.salary-audit summary::-webkit-details-marker{display:none}.salary-audit summary::after{content:"＋";float:right;font:600 15px var(--mono);color:var(--forest)}.salary-audit[open] summary::after{content:"－"}.salary-audit>div{border-top:1px solid var(--line);padding:8px 16px 14px}.timeline-row{display:grid;grid-template-columns:1fr 1fr 1.4fr;gap:10px;padding:8px 2px;border-bottom:1px dotted var(--line);font-size:11px}.timeline-row span:last-child{text-align:right;font-family:var(--mono)}
 
 @media(max-width:640px){
   :root{--radius-xl:24px;--radius-lg:18px;--radius-md:13px}
@@ -81,6 +82,7 @@ input,select{border-radius:12px;min-height:46px;transition:border-color .18s,box
   .tenure-equation{display:grid;grid-template-columns:1fr 1fr;gap:9px;border:0;padding:0}.tenure-equation div{min-height:82px;border:1px solid var(--line);border-radius:15px;background:#fff;padding:13px 8px;display:flex;flex-direction:column;justify-content:center}.tenure-equation .total{background:var(--forest);border-color:var(--forest)}.tenure-equation i{display:none}
   .result-grid{gap:10px;margin:18px 0}.result-card{padding:17px;border-radius:16px;background:#fff}.result-card strong{font-size:19px}
   .breakdown,.leave-audit{border:0;background:#f4f0e7;border-radius:17px;padding:17px;margin-top:14px}.breakdown dl div{gap:12px}.breakdown dd{text-align:right}.leave-audit>div:first-child{display:block}.audit-row{background:#fff;border:0;border-radius:12px;padding:12px;margin-top:8px;gap:3px}
+  .salary-audit{border-radius:17px;margin-top:14px}.timeline-row{grid-template-columns:1fr 1fr}.timeline-row span:last-child{grid-column:1/-1;text-align:left}
   .result-warning{font-size:11px;line-height:1.7;border-radius:14px;padding:14px}
   .sources{border:0;background:rgba(251,248,239,.7);border-radius:24px;padding:25px 20px;margin-bottom:22px}.sources h2{font-size:23px}.source-grid{font-size:12px}
   footer{padding:20px 16px calc(26px + env(safe-area-inset-bottom));font-size:9px}
