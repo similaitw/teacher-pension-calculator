@@ -117,7 +117,7 @@ function renderAudit(rows){
   $('leaveAuditList').innerHTML='';if(!rows.length){$('leaveAuditList').innerHTML='<p class="empty-audit">沒有登錄留職停薪期間。</p>';return;}
   rows.forEach(r=>{const d=document.createElement('div');d.className='audit-row';d.innerHTML=`<span>${r.reason}</span><span>民國 ${r.sy}/${r.sm} — ${r.ey}/${r.em}</span><span class="${r.credited?'yes':'no'}">${r.credited?'採計（已繳付）':'不採計（扣除）'}</span>`;$('leaveAuditList').append(d);});
 }
-function cumulativeAt(scenario,targetAge){return scenario.lump+scenario.monthly*Math.max(0,targetAge-scenario.startAge)*12;}
+function cumulativeAt(scenario,targetAge){return targetAge<scenario.startAge?0:scenario.lump+scenario.monthly*(targetAge-scenario.startAge)*12;}
 function renderFundComparison({age,years,fullLump,baseMonthly,benefitType,retirementMode}){
   const scenarios=[],add=(type,mode,label,startAge,deduction=0)=>{const share=type==='half'?.5:1;scenarios.push({type,mode,label,startAge,lump:type==='lump'?fullLump:type==='half'?fullLump*.5:0,monthly:type==='lump'?0:baseMonthly*share*(1-deduction),deduction});};
   add('lump',age>=65?'mandatory':'full',age>=65?'一次退｜屆齡':'一次退｜一般',age);
@@ -132,21 +132,21 @@ function renderFundComparison({age,years,fullLump,baseMonthly,benefitType,retire
       }
     });
   }
-  const targets=[65,75,85],maxima=Object.fromEntries(targets.map(t=>[t,Math.max(...scenarios.map(s=>cumulativeAt(s,t)))]));
+  const targets=[58,65,75,85],maxima=Object.fromEntries(targets.map(t=>[t,Math.max(...scenarios.map(s=>cumulativeAt(s,t)))]));
   $('comparisonRows').innerHTML='';scenarios.forEach(s=>{
     const selected=s.type===benefitType&&(benefitType==='lump'||s.mode===retirementMode),tr=document.createElement('tr');if(selected)tr.className='is-selected';
-    const cells=[`<span class="scenario-name">${s.label}</span>${selected?'<span class="scenario-tag selected">目前選擇</span>':s.deduction?`<span class="scenario-tag">減 ${(s.deduction*100).toFixed(2)}%</span>`:''}`,s.monthly?`${s.startAge.toFixed(2)} 歲`:'退休時',`${fmt(s.lump)} 元`,s.monthly?`${fmt(s.monthly)} 元`:'—',...targets.map(t=>{const value=cumulativeAt(s,t),best=Math.abs(value-maxima[t])<1;return `<span class="${best?'best':''}">${fmt(value)}${best?' ★':''}</span>`;})];
+    const cells=[`<span class="scenario-name">${s.label}</span>${selected?'<span class="scenario-tag selected">目前選擇</span>':s.deduction?`<span class="scenario-tag">減 ${(s.deduction*100).toFixed(2)}%</span>`:''}`,s.monthly?`${s.startAge.toFixed(2)} 歲`:'退休時',`${fmt(s.lump)} 元`,s.monthly?`${fmt(s.monthly)} 元`:'—',...targets.map(t=>{const value=cumulativeAt(s,t),best=maxima[t]>0&&Math.abs(value-maxima[t])<1;return `<span class="${best?'best':''}">${fmt(value)}${best?' ★':''}</span>`;})];
     cells.forEach((html,i)=>{const td=document.createElement('td');td.innerHTML=html;tr.append(td)});$('comparisonRows').append(tr);
   });
   const reduced=scenarios.find(s=>s.type==='monthly'&&s.mode==='reduced'),deferred=scenarios.find(s=>s.type==='monthly'&&s.mode==='deferred');let insight='';
   if(reduced&&deferred){const lead=reduced.monthly*(58-age)*12,diff=deferred.monthly-reduced.monthly,cross=58+lead/diff/12;insight=`減額月退從退休起先領，至 58 歲約累積 <strong>${fmt(lead)} 元</strong>領先；全額展期月退約在 <strong>${cross.toFixed(1)} 歲</strong>追平，之後展期方案累積較高。`;}
   else if(baseMonthly>0){const cross=age+fullLump/baseMonthly/12;insight=`以一次退休金與全額月退休金直接比較，不計利息時，月退休金累積約在 <strong>${cross.toFixed(1)} 歲</strong>超過一次退休金。`;}
   $('breakEvenInsight').innerHTML=insight;$('comparisonNote').textContent='★ 表示該年齡節點累積金額最高。半月退同時保留一半一次金與一半月退；實際較有利方案仍取決於壽命、資金需求、投資報酬與遺族保障。';
-  return scenarios.map(s=>({label:s.label,startAge:s.startAge,lump:s.lump,monthly:s.monthly,deduction:s.deduction,at65:cumulativeAt(s,65),at75:cumulativeAt(s,75),at85:cumulativeAt(s,85)}));
+  return scenarios.map(s=>({label:s.label,startAge:s.startAge,lump:s.lump,monthly:s.monthly,deduction:s.deduction,at58:cumulativeAt(s,58),at65:cumulativeAt(s,65),at75:cumulativeAt(s,75),at85:cumulativeAt(s,85)}));
 }
 function renderAccountComparison(balance,benefitType){
   const rows=[{type:'lump',label:'一次退',lump:balance,monthly:0},{type:'half',label:'半月退',lump:balance*.5,monthly:null},{type:'monthly',label:'月退',lump:0,monthly:null}];$('comparisonRows').innerHTML='';
-  rows.forEach(s=>{const tr=document.createElement('tr');if(s.type===benefitType)tr.className='is-selected';[`${s.label}${s.type===benefitType?'｜目前選擇':''}`,'依核定方案',`${fmt(s.lump)} 元`,s.monthly===0?'—':'依攤提／年金方案','—','—','—'].forEach(v=>{const td=document.createElement('td');td.textContent=v;tr.append(td)});$('comparisonRows').append(tr)});
+  rows.forEach(s=>{const tr=document.createElement('tr');if(s.type===benefitType)tr.className='is-selected';[`${s.label}${s.type===benefitType?'｜目前選擇':''}`,'依核定方案',`${fmt(s.lump)} 元`,s.monthly===0?'—':'依攤提／年金方案','—','—','—','—'].forEach(v=>{const td=document.createElement('td');td.textContent=v;tr.append(td)});$('comparisonRows').append(tr)});
   $('breakEvenInsight').innerHTML='個人專戶制的月領金額取決於退休時選定的定額、定率攤提或年金保險方案；目前只能完整比較<strong>一次領取比例</strong>，不能用單一月額做可靠的損益交叉推算。';$('comparisonNote').textContent='專戶制應在取得實際專戶餘額及各月領方案報價後，再比較累積給付與遺族保障。';return rows;
 }
 function syncLiveBar(){
