@@ -22,6 +22,12 @@
   </header>
 
   <main id="top">
+    <section id="liveBar" class="live-bar" aria-live="polite">
+      <div class="live-status"><span>即時試算</span><strong id="liveChoice">等待完整資料</strong></div>
+      <div class="live-primary"><span id="liveLabel">退休給付估計</span><strong id="liveValue">—</strong><small id="liveUnit"></small></div>
+      <div class="live-meta"><span>可採計年資 <b id="liveTenure">—</b></span><span id="liveEligibility">輸入後自動更新</span></div>
+      <a href="#comparison">比較全部方案 ↓</a>
+    </section>
     <section class="hero">
       <div class="hero-copy">
         <p class="kicker">把漏掉的空白，也算進退休計畫</p>
@@ -153,7 +159,7 @@
       </section>
 
       <div id="formError" class="form-error" role="alert"></div>
-      <button class="calculate" type="submit"><span>產生我的退休計算單</span><span aria-hidden="true">→</span></button>
+      <button class="calculate" type="submit"><span>更新並前往完整計算單</span><span aria-hidden="true">→</span></button>
     </form>
 
     <section id="results" class="results" hidden aria-live="polite">
@@ -170,6 +176,12 @@
         <article class="result-card"><p>留停總期間</p><strong id="leaveTotal">—</strong><small id="leaveSummary">—</small></article>
         <article class="result-card"><p id="secondaryLabel">公保一次金估計</p><strong id="secondaryValue">—</strong><small id="secondaryNote">—</small></article>
       </div>
+      <section id="comparison" class="comparison-panel">
+        <div class="comparison-head"><div><p class="eyebrow">方案窮舉</p><h3>哪一種領法，何時比較有利？</h3></div><p>以目前輸入的同一退休年月比較；累積金額不含公保一次金、通膨、利息與稅負。</p></div>
+        <div id="breakEvenInsight" class="break-even-insight"></div>
+        <div class="comparison-scroll"><table><thead><tr><th>方案</th><th>起領</th><th>一次金</th><th>每月</th><th>65 歲累積</th><th>75 歲累積</th><th>85 歲累積</th></tr></thead><tbody id="comparisonRows"></tbody></table></div>
+        <p id="comparisonNote" class="comparison-note"></p>
+      </section>
       <div class="breakdown"><h3>計算依據</h3><dl id="breakdownList"></dl></div>
       <details class="salary-audit"><summary>查看年度薪級推估軌跡</summary><div id="salaryTimelineList"></div></details>
       <div class="leave-audit"><div><h3>留停採計明細</h3><p>期間若重疊，系統只計算一次。</p></div><div id="leaveAuditList"></div></div>
