@@ -4,3 +4,5 @@ Thumbs.db
 *.log
 tmp/
 .playwright-cli/
+node_modules/
+test-results/
