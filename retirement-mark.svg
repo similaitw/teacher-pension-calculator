@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">教師退休試算標誌</title>
+  <desc id="desc">一本展開的書、上升的時間弧線與代表退休節點的圓點</desc>
+  <rect width="64" height="64" rx="18" fill="#244c3c"/>
+  <path d="M13 40.5c6.8-3.4 13-3.1 19 1.1 6-4.2 12.2-4.5 19-1.1v8.2c-6.8-2.8-13-2.5-19 1.7-6-4.2-12.2-4.5-19-1.7z" fill="#fbf8ef"/>
+  <path d="M32 41.6v8.8M14.5 31.5A21.5 21.5 0 0 1 49 20.4" fill="none" stroke="#e9c87b" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="49" cy="20.4" r="5.5" fill="#a33b2b" stroke="#fbf8ef" stroke-width="2"/>
+  <path d="M18 30l-4.1 1.6L12.4 27" fill="none" stroke="#e9c87b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

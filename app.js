@@ -252,3 +252,6 @@ $('calculator').addEventListener('submit',e=>calculate(e,{scroll:true}));$('calc
 $('earlyCompareAge').addEventListener('change',scheduleLive);$('lateCompareAge').addEventListener('change',scheduleLive);
 document.addEventListener('input',e=>{if(e.target.matches('input[inputmode=numeric]'))e.target.value=e.target.value.replace(/\D/g,'');});
 fillSalaryPoints();addEducation({target:'master',y:93,m:8});addLeave({reason:'進修',sy:91,sm:8,ey:93,em:7,credited:false});updateChoiceUI();calculate(null,{scroll:false});
+const anchorLinks=Array.from(document.querySelectorAll('.anchor-nav a[href^="#"]'));
+const anchorObserver=new IntersectionObserver(entries=>{const visible=entries.filter(x=>x.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];if(!visible)return;anchorLinks.forEach(link=>{const active=link.hash===`#${visible.target.id}`;link.classList.toggle('active',active);if(active)link.setAttribute('aria-current','step');else link.removeAttribute('aria-current')});},{rootMargin:'-20% 0px -65% 0px',threshold:[0,.1,.5]});
+['system','profile','leave','benefit','results'].forEach(id=>anchorObserver.observe($(id)));

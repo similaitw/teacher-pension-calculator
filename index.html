@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f2efe6">
   <meta name="description" content="公立學校教師退休年資與退休金試算，獨立處理留職停薪期間與退撫基金繳付狀態。">
-  <title>教退尺｜教師退休年資試算</title>
+  <title>教師退休試算｜退休年資與月退比較</title>
+  <link rel="icon" href="retirement-mark.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Serif+TC:wght@500;600;700;900&display=swap" rel="stylesheet">
@@ -14,35 +15,27 @@
 <body>
   <div class="paper-noise" aria-hidden="true"></div>
   <header class="masthead">
-    <a class="wordmark" href="#top" aria-label="教退尺首頁">
-      <span class="seal">退</span>
-      <span>教退尺<small>TEACHER PENSION LEDGER</small></span>
+    <a class="wordmark" href="#top" aria-label="教師退休試算首頁">
+      <img class="brand-mark" src="retirement-mark.svg" alt="">
+      <span>教師退休試算<small>TEACHER RETIREMENT PLANNER</small></span>
     </a>
     <nav class="site-nav" aria-label="主要導覽"><a class="active" href="index.html">退休試算</a><a href="report.html">資料說明與報表</a></nav>
   </header>
 
+  <nav class="anchor-nav-wrap" aria-label="試算段落導覽"><div class="anchor-nav">
+    <a href="#system"><span>01</span>制度</a><a href="#profile"><span>02</span>基本資料</a><a href="#leave"><span>03</span>留職停薪</a><a href="#benefit"><span>04</span>請領方式</a><a href="#results"><span>05</span>試算結果</a><a href="report.html"><span>↗</span>說明與報表</a>
+  </div></nav>
+
   <main id="top">
+    <h1 class="sr-only">教師退休年資與退休金試算</h1>
     <section id="liveBar" class="live-bar" aria-live="polite">
       <div class="live-status"><span>即時試算</span><strong id="liveChoice">等待完整資料</strong></div>
       <div class="live-primary"><span id="liveLabel">退休給付估計</span><strong id="liveValue">—</strong><small id="liveUnit"></small></div>
       <div class="live-meta"><span>可採計年資 <b id="liveTenure">—</b></span><span id="liveEligibility">輸入後自動更新</span></div>
       <a href="#comparison">比較全部方案 ↓</a>
     </section>
-    <section class="hero">
-      <div class="hero-copy">
-        <p class="kicker">把漏掉的空白，也算進退休計畫</p>
-        <h1>你的退休年資，<br><em>不只是到職日相減。</em></h1>
-        <p class="intro">逐筆登錄育嬰、侍親、服役或其他留職停薪，依「是否繼續／完成繳付退撫費用」判斷能否採計，結果會把每一個月交代清楚。</p>
-      </div>
-      <aside class="hero-note" aria-label="試算重點">
-        <span>本版新增</span>
-        <strong>留職停薪<br>逐段採計</strong>
-        <p>曆年年資 − 不採計留停 ＋ 可併計年資</p>
-      </aside>
-    </section>
-
     <form id="calculator" novalidate>
-      <section class="ledger-section">
+      <section id="system" class="ledger-section">
         <div class="section-index">01</div>
         <div class="section-body">
           <div class="section-heading">
@@ -67,7 +60,7 @@
         </div>
       </section>
 
-      <section class="ledger-section">
+      <section id="profile" class="ledger-section">
         <div class="section-index">02</div>
         <div class="section-body">
           <div class="section-heading">
@@ -108,7 +101,7 @@
         </div>
       </section>
 
-      <section class="ledger-section leave-section">
+      <section id="leave" class="ledger-section leave-section">
         <div class="section-index">03</div>
         <div class="section-body">
           <div class="section-heading">
@@ -125,7 +118,7 @@
         </div>
       </section>
 
-      <section class="ledger-section choice-section">
+      <section id="benefit" class="ledger-section choice-section">
         <div class="section-index">04</div>
         <div class="section-body">
           <div class="section-heading">
@@ -153,7 +146,7 @@
         </div>
       </section>
 
-      <section class="ledger-section account-only" hidden>
+      <section id="accountSettings" class="ledger-section account-only" hidden>
         <div class="section-index">05</div>
         <div class="section-body">
           <div class="section-heading"><div><p class="eyebrow">專戶假設</p><h2>設定提撥與報酬</h2></div><p>用實質年報酬率呈現購買力；結果不代表保證收益。</p></div>
@@ -221,7 +214,7 @@
       </div>
     </section>
   </main>
-  <footer><span>教退尺 · 獨立前端試算</span><span>版本 1.1 · 2026.08</span></footer>
+  <footer><span>教師退休試算 · 獨立前端工具</span><span>版本 1.1 · 2026.08</span></footer>
   <template id="leaveTemplate">
     <article class="leave-item">
       <div class="leave-number">留停 <span></span></div>
