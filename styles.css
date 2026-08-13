@@ -124,3 +124,14 @@ input,select{border-radius:12px;min-height:46px;transition:border-color .18s,box
   .sources{border:0;background:rgba(251,248,239,.7);border-radius:24px;padding:25px 20px;margin-bottom:22px}.sources h2{font-size:23px}.source-grid{font-size:12px}
   footer{padding:20px 16px calc(26px + env(safe-area-inset-bottom));font-size:9px}
 }
+
+/* Persistent calculator console: brand, anchors and live result stay visible together. */
+body:not(.report-page) .masthead{position:sticky;top:0;z-index:30;background:rgba(247,243,233,.96);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+body:not(.report-page) .anchor-nav-wrap{top:101px;z-index:29}
+body:not(.report-page) .live-bar{top:158px;z-index:28}
+body:not(.report-page) #system,body:not(.report-page) #profile,body:not(.report-page) #leave,body:not(.report-page) #benefit,body:not(.report-page) #accountSettings,body:not(.report-page) #results,body:not(.report-page) #comparison{scroll-margin-top:285px}
+@media(max-width:640px){
+  body:not(.report-page) .anchor-nav-wrap{top:67px}
+  body:not(.report-page) .live-bar{top:116px}
+  body:not(.report-page) #system,body:not(.report-page) #profile,body:not(.report-page) #leave,body:not(.report-page) #benefit,body:not(.report-page) #accountSettings,body:not(.report-page) #results,body:not(.report-page) #comparison{scroll-margin-top:230px}
+}
