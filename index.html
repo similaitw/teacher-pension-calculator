@@ -188,10 +188,11 @@
           <span class="versus">VS</span>
           <label><span>延後退休</span><select id="lateCompareAge"><option value="58" selected>58 歲</option><option value="59">59 歲</option><option value="60">60 歲</option><option value="61">61 歲</option><option value="62">62 歲</option><option value="63">63 歲</option><option value="64">64 歲</option><option value="65">65 歲</option></select></label>
         </div>
+        <label class="income-mode-toggle"><input id="includeWorkIncome" type="checkbox" checked><span class="toggle-track" aria-hidden="true"><i></i></span><span><strong>納入目前工作的年收入</strong><small>關閉後，延後退休前的收入以 0 計，只比較退休金累積。</small></span></label>
         <div id="incomeCrossInsight" class="income-cross-insight"></div>
         <div id="incomeSummary" class="income-summary"></div>
         <details class="income-yearly" open><summary>查看逐年收入與累積差額</summary><div class="income-table-scroll"><table><thead><tr><th>年齡／年度</th><th>減額方案年收入</th><th>延後方案年收入</th><th>減額累積</th><th>延後累積</th><th>延後方案差額</th></tr></thead><tbody id="incomeYearRows"></tbody></table></div></details>
-        <p class="comparison-note">工作收入＝每月固定薪給 ×（12＋年終月數＋考核月數）＋其他年度收入，並依薪級路徑推估。為定位交叉月份，年度獎金平均攤入 12 個月；這是現金流比較，不衡量少工作數年的時間價值。</p>
+        <p class="comparison-note">勾選工作收入時：工作收入＝每月固定薪給 ×（12＋年終月數＋考核月數）＋其他年度收入，並依薪級路徑推估。為定位交叉月份，年度獎金平均攤入 12 個月；這是現金流比較，不衡量少工作數年的時間價值。</p>
       </section>
       <div class="breakdown"><h3>計算依據</h3><dl id="breakdownList"></dl></div>
       <details class="salary-audit"><summary>查看年度薪級推估軌跡</summary><div id="salaryTimelineList"></div></details>
