@@ -31,6 +31,14 @@ npx playwright install chromium
 npm run test:release
 ```
 
+正式版另須將三類去識別化正式案例放入 `validation-cases/`，再執行：
+
+```powershell
+npm run test:formal-release
+```
+
+案例格式、去識別化項目與允許誤差說明見 [validation-cases/README.md](validation-cases/README.md)。三類案例未齊或任一正式數值超出誤差時，此指令必定失敗；範例 JSON 不會計入正式案例。
+
 線上版本：<https://retireplan-flax.vercel.app/>
 
 本工具僅供規劃，不是正式退休審定。

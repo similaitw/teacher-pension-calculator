@@ -6,6 +6,8 @@
 
 - `npm test`：基金制、舊制、年資切分、上限取捨、所得扣減、優惠存款與比較引擎。
 - `npm run test:e2e`：預設基金制、舊制＋核定優存、55／58／65 歲合法情境、手機寬度、報表金額與 anchor。
+- `npm run test:official`：讀取三類去識別化正式案例，逐欄比對年資、薪額、一次退、月退與扣減並列出差額。
+- `npm run test:formal-release`：依序執行內部發布回歸與正式案例閘門；任一項不符即停止。
 - GitHub Actions：PR 與 `main` push 均執行單元測試及 Chromium 端到端測試。
 
 ## 已人工檢核
@@ -18,5 +20,7 @@
 
 - `[!]` 尚缺至少三份去識別化正式資料：純基金制、舊新混合、含留停／併計年資。
 - `[!]` 需逐項比對正式審定或人事試算的年資、薪額、一次退、月退與扣減。
+
+案例匯入格式與匿名化清單已建立於 [validation-cases/README.md](validation-cases/README.md)。目前執行 `npm run test:official` 會因三類正式案例均為 0 份而正確回傳失敗；`*.example.json` 僅為空白格式，不納入閘門。
 
 外部案例未完成前，只能標示為發布候選版，不得宣稱已通過正式審定案例驗證。

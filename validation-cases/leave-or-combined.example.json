@@ -1,0 +1,18 @@
+{
+  "id": "請填無個資案例代號",
+  "category": "leave-or-combined",
+  "source": { "document": "請填正式審定或人事試算來源代稱", "anonymized": false },
+  "input": {
+    "retirementTrack": "fund",
+    "segments": [
+      { "id": "任職", "serviceType": "teacher", "start": 0, "end": 1, "credited": true, "contributionPaid": true, "evidence": "請填無個資證明代稱" },
+      { "id": "留停", "serviceType": "teacher", "start": 1, "end": 2, "credited": false, "contributionPaid": false, "evidence": "請填是否補繳及核定結果" }
+    ],
+    "legacyInput": { "mode": "segments" },
+    "averageSalary": 0,
+    "finalSalary": 0,
+    "preferentialInterest": 0
+  },
+  "expected": { "creditedMonths": 0, "legacyMonths": 0, "fundMonths": 0, "accountMonths": 0, "averageSalary": 0, "finalSalary": 0, "lump": 0, "monthly": 0, "totalDeduction": 0 },
+  "tolerance": { "money": 1, "months": 0 }
+}

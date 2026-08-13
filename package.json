@@ -5,7 +5,9 @@
   "scripts": {
     "test": "node --test tests/*.test.js",
     "test:e2e": "playwright test",
-    "test:release": "npm test && npm run test:e2e"
+    "test:official": "node scripts/validate-official-cases.js",
+    "test:release": "npm test && npm run test:e2e",
+    "test:formal-release": "npm run test:release && npm run test:official"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.10.2",
