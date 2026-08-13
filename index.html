@@ -193,13 +193,14 @@
       </div>
       <div id="schemeTenure" class="scheme-tenure"><div><span>舊制年資</span><strong id="legacyTenure">—</strong></div><div><span>基金制年資</span><strong id="fundTenure">—</strong></div><div><span>個人專戶制年資</span><strong id="accountTenure">—</strong></div><div><span>可採計合計</span><strong id="schemeTenureTotal">—</strong></div><div class="selection-card"><span>年資取捨</span><strong id="selectionSummary">—</strong></div></div>
       <section id="comparison" class="comparison-panel">
-        <div class="comparison-head"><div><p class="eyebrow">方案窮舉</p><h3>哪一種領法，何時比較有利？</h3></div><p>以目前輸入的同一退休年月比較；累積金額不含公保一次金、通膨、利息與稅負。</p></div>
+        <div class="comparison-head"><div><p class="eyebrow">方案窮舉</p><h3>哪一種領法，何時比較有利？</h3></div><p>以目前輸入的同一退休年月比較；不含公保一次金、通膨與稅負，一次金報酬可另行開啟。</p></div>
+        <div id="lumpReturnSettings" class="return-assumption"><label class="income-mode-toggle"><input id="includeLumpReturn" type="checkbox"><span class="toggle-track" aria-hidden="true"><i></i></span><span><strong>一次退休金納入投資報酬</strong><small>預設關閉，以 0% 做保守比較；開啟後才套用右側年報酬率。</small></span></label><label class="return-rate"><span>一次金年報酬率</span><div><input id="lumpReturnRate" type="number" min="-99" max="30" step="0.1" value="0" disabled><b>%</b></div></label></div>
         <div id="breakEvenInsight" class="break-even-insight"></div>
         <div class="comparison-scroll"><table><thead><tr><th>方案</th><th>起領</th><th>一次金</th><th>每月</th><th>58 歲累積</th><th>65 歲累積</th><th>75 歲累積</th><th>85 歲累積</th></tr></thead><tbody id="comparisonRows"></tbody></table></div>
         <p id="comparisonNote" class="comparison-note"></p>
       </section>
       <section id="careerIncomePanel" class="career-income-panel">
-        <div class="comparison-head"><div><p class="eyebrow">年度總收入</p><h3>提早月退，還是繼續任職？</h3></div><p>從提早退休當月起，逐年加總工作收入與退休金；不含公保一次金、年終、考績獎金、通膨、稅負及投資收益。</p></div>
+        <div class="comparison-head"><div><p class="eyebrow">年度總收入</p><h3>提早月退，還是繼續任職？</h3></div><p>自提早退休當月開始累積，逐年表由 58 歲列示並承接先前金額；工作收入與退休金在退休生效月不會重複計入。</p></div>
         <div class="income-controls">
           <label><span>減額退休</span><select id="earlyCompareAge"><option value="53">53 歲</option><option value="54">54 歲</option><option value="55" selected>55 歲</option><option value="56">56 歲</option><option value="57">57 歲</option></select></label>
           <span class="versus">VS</span>
@@ -253,6 +254,7 @@
     </article>
   </template>
   <script src="pension-rules.js"></script>
+  <script src="comparison-engine.js"></script>
   <script src="service-tenure.js"></script>
   <script src="app.js"></script>
 </body>

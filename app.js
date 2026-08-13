@@ -8,8 +8,9 @@ const EDU={
 };
 const {RULES_VERSION,averageSalaryYears,calculateFundPension,findMostFavorableSelection}=PensionRules;
 const {calculateServiceTenure}=ServiceTenure;
+const {enumeratePensionScenarios,cumulativeAt:cumulativeScenarioAt,compareAtTargets,findCrossover,monthlyCashAt,sumMonthlyCash}=ComparisonEngine;
 const $=id=>document.getElementById(id);
-const fmt=n=>Math.round(n).toLocaleString('zh-TW');
+const fmt=n=>{const rounded=Math.round(n);return Object.is(rounded,-0)||rounded===0?'0':rounded.toLocaleString('zh-TW');};
 function fieldError(message,focusId){const error=new Error(message);error.focusId=focusId;return error;}
 const monthIndex=(y,m)=>Number(y)*12+Number(m)-1;
 const duration=(a,b)=>Math.max(0,b-a);
@@ -124,64 +125,52 @@ function renderAudit(rows){
   $('leaveAuditList').innerHTML='';if(!rows.length){$('leaveAuditList').innerHTML='<p class="empty-audit">沒有登錄留職停薪期間。</p>';return;}
   rows.forEach(r=>{const d=document.createElement('div');d.className='audit-row';d.innerHTML=`<span>${r.reason}</span><span>民國 ${r.sy}/${r.sm} — ${r.ey}/${r.em}</span><span class="${r.credited?'yes':'no'}">${r.credited?'採計（已繳付）':'不採計（扣除）'}</span>`;$('leaveAuditList').append(d);});
 }
-function renderCareerIncomeComparison({birthAt,workStart,initial,events,leaves,prior,currentPoint,currentBase}){
+function renderCareerIncomeComparison({birthAt,workStart,initial,events,leaves,prior,currentPoint,currentBase,monthlyAtRetirement}){
   const panel=$('careerIncomePanel'),earlyAge=Number($('earlyCompareAge').value),lateAge=Number($('lateCompareAge').value),includeWorkIncome=$('includeWorkIncome').checked,rawIncome=Number($('workIncome').value),enteredIncome=rawIncome>0?rawIncome:currentBase,incomeGap=enteredIncome-currentBase,yearEndMonths=Math.max(0,Number($('yearEndMonths').value)||0),performanceMonths=Math.max(0,Number($('performanceMonths').value)||0),otherAnnualIncome=Math.max(0,Number($('otherAnnualIncome').value)||0),bonusMonths=yearEndMonths+performanceMonths,currentAnnualIncome=enteredIncome*(12+bonusMonths)+otherAnnualIncome;
   panel.hidden=false;
   const excluded=leaves.filter(x=>!x.credited).map(x=>[x.start,x.end]);
   const makeScenario=age=>{
     const retireAt=birthAt+age*12;if(retireAt<=workStart)return null;
-    const raw=duration(workStart,retireAt),uncredited=overlapMonths(excluded,workStart,retireAt),years=(raw-uncredited+prior)/12;
-    if(years<15||(age<60&&years<25))return null;
+    const raw=duration(workStart,retireAt),uncredited=overlapMonths(excluded,workStart,retireAt);let years=(raw-uncredited+prior)/12;
     const altEvents=events.filter(x=>x.at<retireAt),timeline=buildSalaryTimeline(initial,altEvents,workStart,retireAt,currentPoint),last=timeline.salaries[timeline.salaries.length-1];
-    const retireRocYear=Math.floor(retireAt/12),avgYears=averageSalaryYears(retireRocYear),avgWindow=salaryAverageWindow(timeline.salaries,workStart,excluded,avgYears*12),avg=avgWindow.avg,pension=calculateFundPension({years,averageSalary:avg,finalSalary:last});
+    const retireRocYear=Math.floor(retireAt/12),avgYears=averageSalaryYears(retireRocYear),avgWindow=salaryAverageWindow(timeline.salaries,workStart,excluded,avgYears*12),avg=avgWindow.avg,pension=monthlyAtRetirement?monthlyAtRetirement({retireAt,age,years,timeline,last,avg,excluded}):calculateFundPension({years,averageSalary:avg,finalSalary:last});
+    years=Number.isFinite(pension.years)?pension.years:years;if(years<15||(age<60&&years<25))return null;
     const fullMonthly=pension.monthly,deduction=age<58?Math.min(.2,(58-age)*.04):0;
-    return{age,retireAt,years,monthly:fullMonthly*(1-deduction),deduction,workIncome:timeline.salaries.map(value=>Math.max(0,value+incomeGap)*(1+bonusMonths/12)+otherAnnualIncome/12)};
+    return{age,retireAt,retirementMonth:retireAt,years,monthly:fullMonthly*(1-deduction),monthlyPension:fullMonthly*(1-deduction),deduction,workIncome:timeline.salaries.map(value=>Math.max(0,value+incomeGap)*(1+bonusMonths/12)+otherAnnualIncome/12)};
   };
   const early=makeScenario(earlyAge),late=makeScenario(lateAge),rows=$('incomeYearRows');rows.innerHTML='';$('incomeSummary').innerHTML='';
   if(!early||!late){$('incomeCrossInsight').innerHTML='目前輸入的到職年資不足以建立這組比較。減額月退方案原則上須具備可退休條件且年資滿 15 年；本表並以一般自願退休年資條件檢核。';return null;}
-  const fallbackWorkIncome=Math.max(0,currentBase+incomeGap)*(1+bonusMonths/12)+otherAnnualIncome/12,incomeAt=(scenario,at)=>at>=scenario.retireAt?scenario.monthly:includeWorkIncome?(scenario.workIncome[at-workStart]||fallbackWorkIncome):0;
-  let earlyCum=0,lateCum=0,sawEarlyLead=false,crossoverAt=null;
+  const fallbackWorkIncome=Math.max(0,currentBase+incomeGap)*(1+bonusMonths/12)+otherAnnualIncome/12,toCashScenario=scenario=>({retirementMonth:scenario.retireAt,monthlyPension:scenario.monthly,workIncome:at=>scenario.workIncome[at-workStart]||fallbackWorkIncome}),earlyCash=toCashScenario(early),lateCash=toCashScenario(late),incomeAt=(scenario,at)=>monthlyCashAt(scenario===early?earlyCash:lateCash,at,{includeWorkIncome});
+  let earlyCum=0,lateCum=0,sawEarlyLead=false,crossoverAt=null,crossoverDiff=null,crossoverPreviousDiff=null,previousDiff=null;
   for(let at=early.retireAt;at<birthAt+100*12;at++){
-    earlyCum+=incomeAt(early,at);lateCum+=incomeAt(late,at);const diff=lateCum-earlyCum;if(diff<0)sawEarlyLead=true;if(sawEarlyLead&&diff>=0){crossoverAt=at+1;break;}
+    earlyCum+=incomeAt(early,at);lateCum+=incomeAt(late,at);const diff=lateCum-earlyCum;if(diff<0)sawEarlyLead=true;if(sawEarlyLead&&diff>=0){crossoverAt=at+1;crossoverDiff=diff;crossoverPreviousDiff=previousDiff;break;}previousDiff=diff;
   }
-  let salaryUntilLate=0;for(let at=early.retireAt;at<late.retireAt;at++)salaryUntilLate+=incomeAt(late,at);
-  const crossAge=crossoverAt?(crossoverAt-birthAt)/12:null,crossText=!sawEarlyLead?'延後方案從比較起點即累積較高，沒有先落後再追上的交叉點。':crossAge?`延後退休方案約在 <strong>${crossAge.toFixed(1)} 歲</strong>追上減額提早退休，形成黃金交叉；之後累積總收入較高。`:'計算至 100 歲，延後退休方案仍未追上減額提早退休，沒有黃金交叉。';
+  const salaryUntilLate=sumMonthlyCash(lateCash,early.retireAt,late.retireAt,{includeWorkIncome});
+  const crossAge=crossoverAt?(crossoverAt-birthAt)/12:null,crossText=!sawEarlyLead?'延後方案從比較起點即累積較高，沒有先落後再追上的交叉點。':crossAge?`延後退休方案在 <strong>${monthLabel(crossoverAt-1)}、約 ${crossAge.toFixed(2)} 歲</strong>形成黃金交叉；前一月差額 ${fmt(crossoverPreviousDiff)} 元，交叉月差額 ${crossoverDiff>=0?'+':''}${fmt(crossoverDiff)} 元。`:'計算至 100 歲，延後退休方案仍未追上減額提早退休，沒有黃金交叉。';
   $('incomeCrossInsight').innerHTML=crossText;
   const summary=[['比較口徑',includeWorkIncome?'含工作收入':'只比退休金'],['減額月退',`${fmt(early.monthly)} 元／月`],[`${lateAge} 歲月退`,`${fmt(late.monthly)} 元／月`],[includeWorkIncome?'延後期間工作收入':'退休前年收入',includeWorkIncome?`${fmt(salaryUntilLate)} 元`:'不納入'],['黃金交叉',crossAge?`${crossAge.toFixed(1)} 歲`:sawEarlyLead?'100 歲後／無':'起點即領先']];
   summary.forEach(([label,value])=>{const card=document.createElement('article');card.innerHTML=`<span>${label}</span><strong>${value}</strong>`;$('incomeSummary').append(card)});
-  earlyCum=0;lateCum=0;
-  const yearly=[];for(let age=earlyAge;age<85;age++){
-    let earlyYear=0,lateYear=0;for(let offset=0;offset<12;offset++){const at=birthAt+age*12+offset;earlyYear+=incomeAt(early,at);lateYear+=incomeAt(late,at);}earlyCum+=earlyYear;lateCum+=lateYear;const diff=lateCum-earlyCum,tr=document.createElement('tr');if(crossAge&&age<=crossAge&&crossAge<age+1)tr.className='cross-row';
+  const tableStartAge=Math.max(58,earlyAge),tableStart=birthAt+tableStartAge*12;earlyCum=sumMonthlyCash(earlyCash,early.retireAt,tableStart,{includeWorkIncome});lateCum=sumMonthlyCash(lateCash,early.retireAt,tableStart,{includeWorkIncome});
+  const yearly=[];for(let age=tableStartAge;age<85;age++){
+    const yearStart=birthAt+age*12,earlyYear=sumMonthlyCash(earlyCash,yearStart,yearStart+12,{includeWorkIncome}),lateYear=sumMonthlyCash(lateCash,yearStart,yearStart+12,{includeWorkIncome});earlyCum+=earlyYear;lateCum+=lateYear;const diff=lateCum-earlyCum,tr=document.createElement('tr');if(crossAge&&age<=crossAge&&crossAge<age+1)tr.className='cross-row';
     const lateStage=age<lateAge?(includeWorkIncome?'工作收入':'未起領'):'月退休金',cells=[`${age}–${age+1} 歲｜民國 ${Math.floor((birthAt+age*12)/12)} 年起`,`${fmt(earlyYear)} 元｜月退`,`${fmt(lateYear)} 元｜${lateStage}`,`${fmt(earlyCum)} 元`,`${fmt(lateCum)} 元`,`${diff>=0?'+':''}${fmt(diff)} 元`];cells.forEach((value,i)=>{const td=document.createElement('td');td.textContent=value;if(i===5)td.className=diff>=0?'positive':'negative';tr.append(td)});rows.append(tr);yearly.push({age,earlyYear,lateYear,earlyCum,lateCum,diff,lateStage});
   }
-  return{earlyAge,lateAge,includeWorkIncome,earlyMonthly:early.monthly,lateMonthly:late.monthly,currentAnnualIncome,salaryUntilLate,crossoverAge:crossAge,yearEndMonths,performanceMonths,otherAnnualIncome,yearly};
+  return{earlyAge,lateAge,tableStartAge,includeWorkIncome,earlyMonthly:early.monthly,lateMonthly:late.monthly,currentAnnualIncome,salaryUntilLate,crossoverAge:crossAge,crossoverMonth:crossoverAt,crossoverDiff,previousDiff:crossoverPreviousDiff,yearEndMonths,performanceMonths,otherAnnualIncome,yearly};
 }
-function cumulativeAt(scenario,targetAge){return targetAge<scenario.startAge?0:scenario.lump+scenario.monthly*(targetAge-scenario.startAge)*12;}
-function renderFundComparison({age,years,fullLump,baseMonthly,benefitType,retirementMode}){
-  const scenarios=[],add=(type,mode,label,startAge,deduction=0)=>{const share=type==='half'?.5:1;scenarios.push({type,mode,label,startAge,lump:type==='lump'?fullLump:type==='half'?fullLump*.5:0,monthly:type==='lump'?0:baseMonthly*share*(1-deduction),deduction});};
-  add('lump',age>=65?'mandatory':'full',age>=65?'一次退｜屆齡':'一次退｜一般',age);
-  if(years>=15){
-    ['half','monthly'].forEach(type=>{
-      const name=type==='half'?'半月退':'月退';
-      if(age>=65)add(type,'mandatory',`${name}｜屆齡`,age);
-      else if(age>=58)add(type,'full',`${name}｜全額`,age);
-      else{
-        if(age>=53)add(type,'reduced',`${name}｜減額`,age,Math.min(.2,(58-age)*.04));
-        add(type,'deferred',`${name}｜展期`,58);
-      }
-    });
-  }
-  const targets=[58,65,75,85],maxima=Object.fromEntries(targets.map(t=>[t,Math.max(...scenarios.map(s=>cumulativeAt(s,t)))]));
+function renderFundComparison({age,years,benefits,benefitType,retirementMode}){
+  const includeReturn=$('includeLumpReturn').checked,rate=includeReturn?Number($('lumpReturnRate').value||0)/100:0;
+  if(!Number.isFinite(rate)||rate<=-1||rate>.3)throw fieldError('一次金年報酬率請填大於 -100% 且不超過 30%。','lumpReturnRate');
+  const scenarios=enumeratePensionScenarios({retirementAge:age,years,benefits,selectedType:benefitType,selectedMode:retirementMode}),targets=[58,65,75,85],targetRows=compareAtTargets(scenarios,targets,rate),maxima=Object.fromEntries(targetRows.map(row=>[row.age,row.max]));
   $('comparisonRows').innerHTML='';scenarios.forEach(s=>{
-    const selected=s.type===benefitType&&(benefitType==='lump'||s.mode===retirementMode),tr=document.createElement('tr');if(selected)tr.className='is-selected';
-    const cells=[`<span class="scenario-name">${s.label}</span>${selected?'<span class="scenario-tag selected">目前選擇</span>':s.deduction?`<span class="scenario-tag">減 ${(s.deduction*100).toFixed(2)}%</span>`:''}`,s.monthly?`${s.startAge.toFixed(2)} 歲`:'退休時',`${fmt(s.lump)} 元`,s.monthly?`${fmt(s.monthly)} 元`:'—',...targets.map(t=>{const value=cumulativeAt(s,t),best=maxima[t]>0&&Math.abs(value-maxima[t])<1;return `<span class="${best?'best':''}">${fmt(value)}${best?' ★':''}</span>`;})];
+    const tr=document.createElement('tr');if(s.selected)tr.className='is-selected';
+    const cells=[`<span class="scenario-name">${s.label}</span>${s.selected?'<span class="scenario-tag selected">目前選擇</span>':s.deduction?`<span class="scenario-tag">減 ${(s.deduction*100).toFixed(2)}%</span>`:''}`,s.monthly?`${s.startAge.toFixed(2)} 歲`:'退休時',`${fmt(s.lump)} 元`,s.monthly?`${fmt(s.monthly)} 元`:'—',...targets.map(t=>{const value=cumulativeScenarioAt(s,t,rate),best=maxima[t]>0&&Math.abs(value-maxima[t])<1;return `<span class="${best?'best':''}">${fmt(value)}${best?' ★':''}</span>`;})];
     cells.forEach((html,i)=>{const td=document.createElement('td');td.innerHTML=html;tr.append(td)});$('comparisonRows').append(tr);
   });
   const reduced=scenarios.find(s=>s.type==='monthly'&&s.mode==='reduced'),deferred=scenarios.find(s=>s.type==='monthly'&&s.mode==='deferred');let insight='';
-  if(reduced&&deferred){const lead=reduced.monthly*(58-age)*12,diff=deferred.monthly-reduced.monthly,cross=58+lead/diff/12;insight=`減額月退從退休起先領，至 58 歲約累積 <strong>${fmt(lead)} 元</strong>領先；全額展期月退約在 <strong>${cross.toFixed(1)} 歲</strong>追平，之後展期方案累積較高。`;}
-  else if(baseMonthly>0){const cross=age+fullLump/baseMonthly/12;insight=`以一次退休金與全額月退休金直接比較，不計利息時，月退休金累積約在 <strong>${cross.toFixed(1)} 歲</strong>超過一次退休金。`;}
-  $('breakEvenInsight').innerHTML=insight;$('comparisonNote').textContent='★ 表示該年齡節點累積金額最高。半月退同時保留一半一次金與一半月退；實際較有利方案仍取決於壽命、資金需求、投資報酬與遺族保障。';
-  return scenarios.map(s=>({label:s.label,startAge:s.startAge,lump:s.lump,monthly:s.monthly,deduction:s.deduction,at58:cumulativeAt(s,58),at65:cumulativeAt(s,65),at75:cumulativeAt(s,75),at85:cumulativeAt(s,85)}));
+  if(reduced&&deferred){const lead=cumulativeScenarioAt(reduced,58,rate),cross=findCrossover(reduced,deferred,{startAge:age,endAge:100,lumpReturnRate:rate});insight=cross.crossed?`減額月退至 58 歲約先累積 <strong>${fmt(lead)} 元</strong>；展期全額月退約在 <strong>${cross.age.toFixed(2)} 歲</strong>追平，交叉當月差額 ${cross.diff>=0?'+':''}${fmt(cross.diff)} 元。`:'計算至 100 歲，展期全額月退仍未追上減額月退，沒有黃金交叉。';}
+  else{const lump=scenarios.find(s=>s.type==='lump'),monthly=scenarios.find(s=>s.type==='monthly');if(lump&&monthly){const cross=findCrossover(lump,monthly,{startAge:age,endAge:100,lumpReturnRate:rate});insight=cross.crossed?`月退休金累積約在 <strong>${cross.age.toFixed(2)} 歲</strong>超過一次退休金；交叉當月差額 ${cross.diff>=0?'+':''}${fmt(cross.diff)} 元。`:'計算至 100 歲，月退休金仍未超過一次退休金。';}}
+  $('breakEvenInsight').innerHTML=insight;$('comparisonNote').textContent=`★ 表示該年齡節點累積金額最高。一次金投資報酬假設：${includeReturn?`${(rate*100).toFixed(1)}%／年複利`:'不納入（0%）'}；月退不計投資、通膨與稅負。`;
+  return scenarios.map(s=>({label:s.label,type:s.type,mode:s.mode,startAge:s.startAge,lump:s.lump,monthly:s.monthly,deduction:s.deduction,at58:cumulativeScenarioAt(s,58,rate),at65:cumulativeScenarioAt(s,65,rate),at75:cumulativeScenarioAt(s,75,rate),at85:cumulativeScenarioAt(s,85,rate),lumpReturnRate:rate}));
 }
 function renderAccountComparison(balance,benefitType){
   const rows=[{type:'lump',label:'一次退',lump:balance,monthly:0},{type:'half',label:'半月退',lump:balance*.5,monthly:null},{type:'monthly',label:'月退',lump:0,monthly:null}];$('comparisonRows').innerHTML='';
@@ -221,12 +210,12 @@ function calculate(e,options={}){
     if(years<15&&benefitType!=='lump')throw new Error('可採計年資未滿 15 年，依法原則上只能選擇一次退休金。');
     const annualSummary=annualSalarySummary(timeline.points,s);$('rawTenure').textContent=ymText(raw);$('leaveDeduct').textContent=ymText(uncredited);$('priorTenure').textContent=ymText(prior);$('creditedTenure').textContent=ymText(credited);$('retireAge').textContent=ymText(r-b);$('leaveTotal').textContent=ymText(allLeave);$('leaveSummary').textContent=allLeave?`其中 ${ymText(uncredited)} 不採計`:'未登錄留停';$('breakdownList').innerHTML='';renderAudit(leaves);renderSalaryTimeline(annualSummary);$('legacyTenure').textContent=ymText(schemeTenure.enabled?schemeTenure.legacyMonths:0);$('fundTenure').textContent=ymText(system==='fund'?(schemeTenure.enabled?schemeTenure.fundMonths:credited):0);$('accountTenure').textContent=ymText(system==='account'?credited:0);$('schemeTenureTotal').textContent=ymText(credited);$('selectionSummary').textContent=schemeTenure.enabled?schemeTenure.selectionNote:'未跨制度，無須取捨';
     let comparison=[],incomeComparison=null;if(system==='fund'){
-      const avgYears=averageSalaryYears(retire.y),avgWindow=salaryAverageWindow(timeline.salaries,s,excluded,avgYears*12),avg=avgWindow.avg,pension=calculateFundPension({years,averageSalary:avg,finalSalary:last});let pRate=pension.monthlyRate,rRate=pension.incomeReplacementRate,formula=pension.statutoryMonthly,ceiling=pension.replacementCeiling,baseMonthly=pension.monthly,bases=pension.lumpBases,fullLump=pension.lump,mixedSelected=null;const gpiMonths=Math.min(42,years*1.2),gpi=last*gpiMonths;
+      const avgYears=averageSalaryYears(retire.y),avgWindow=salaryAverageWindow(timeline.salaries,s,excluded,avgYears*12),avg=avgWindow.avg,pension=calculateFundPension({years,averageSalary:avg,finalSalary:last});let pRate=pension.monthlyRate,rRate=pension.incomeReplacementRate,formula=pension.statutoryMonthly,ceiling=pension.replacementCeiling,baseMonthly=pension.monthly,bases=pension.lumpBases,fullLump=pension.lump,mixedSelected=null,comparisonBenefits={lump:{lump:pension.lump},half:{lump:pension.lump*.5,monthly:pension.monthly*.5},monthly:{monthly:pension.monthly}};const gpiMonths=Math.min(42,years*1.2),gpi=last*gpiMonths;
       if(schemeTenure.enabled&&schemeTenure.legacyMonths>0){
         const mixedOptions={legacyMonths:schemeTenure.legacyMonths,fundMonths:schemeTenure.fundMonths,averageSalary:avg,finalSalary:last,preferentialInterest:Math.max(0,Number($('preferentialInterest').value)||0),qualifiedForMonthlyBefore2018:$('qualifiedBefore2018').checked,specialLongServiceTeacher:$('specialLongService').checked};
         const monthlyBest=findMostFavorableSelection({...mixedOptions,benefitType:'monthly',objective:'monthly'}),lumpBest=findMostFavorableSelection({...mixedOptions,benefitType:'lump',objective:'lump'}),halfBest=findMostFavorableSelection({...mixedOptions,benefitType:'half',objective:'monthly'});
         if(!monthlyBest||!lumpBest||!halfBest)throw new Error('舊新制合併年資尚未符合所選退休金的一般資格。');
-        mixedSelected=benefitType==='lump'?lumpBest:benefitType==='half'?halfBest:monthlyBest;baseMonthly=monthlyBest.netMonthly;fullLump=lumpBest.grossLump;formula=monthlyBest.grossMonthly;ceiling=monthlyBest.ceiling.ceiling;rRate=monthlyBest.ceiling.rate;bases=monthlyBest.fund.lumpBases;pRate=monthlyBest.fund.monthlyRate;
+        mixedSelected=benefitType==='lump'?lumpBest:benefitType==='half'?halfBest:monthlyBest;baseMonthly=monthlyBest.netMonthly;fullLump=lumpBest.grossLump;formula=monthlyBest.grossMonthly;ceiling=monthlyBest.ceiling.ceiling;rRate=monthlyBest.ceiling.rate;bases=monthlyBest.fund.lumpBases;pRate=monthlyBest.fund.monthlyRate;comparisonBenefits={lump:{lump:lumpBest.grossLump},half:{lump:halfBest.grossLump,monthly:halfBest.netMonthly},monthly:{monthly:monthlyBest.netMonthly}};
         $('selectionSummary').textContent=`採舊 ${ymText(mixedSelected.selection.legacyMonths)}＋基金 ${ymText(mixedSelected.selection.fundMonths)}`;
       }
       let earlyYears=0,deduct=0,startNote='退休生效日起';
@@ -248,11 +237,16 @@ function calculate(e,options={}){
       if(mixedSelected){addLine('舊制可用年資',ymText(schemeTenure.legacyMonths));addLine('基金制可用年資',ymText(schemeTenure.fundMonths));addLine('本方案採計舊制年資',ymText(mixedSelected.selection.legacyMonths));addLine('本方案採計基金制年資',ymText(mixedSelected.selection.fundMonths));addLine('舊制一次退基數',mixedSelected.legacy.lumpBases.toFixed(2));addLine('舊制月退率',`${(mixedSelected.legacy.monthlyRate*100).toFixed(2)}%`);addLine('舊制月退（扣減前）',`${fmt(mixedSelected.legacy.monthly)} 元`);addLine('基金制月退（扣減前）',`${fmt(mixedSelected.fund.monthly)} 元`);if(mixedSelected.ceiling){addLine('優存利息扣減',`${fmt(mixedSelected.ceiling.deductions.preferentialInterest)} 元`);addLine('舊制月退扣減',`${fmt(mixedSelected.ceiling.deductions.legacyMonthly)} 元`);addLine('基金制月退扣減',`${fmt(mixedSelected.ceiling.deductions.fundMonthly)} 元`);}}
       addLine('薪級路徑假設','以目前薪級為錨點、每滿一年晉一級；未個別判斷考核停晉');
       addLine('退休金種類',benefitType==='lump'?'一次退休金':benefitType==='half'?'二分之一次退休金＋二分之一月退休金':'全額月退休金');if(benefitType!=='lump')addLine('月退起領情境',startNote);addLine('適用退休年度',`民國 ${retire.y} 年`);addLine('曆年任職期間',`${monthLabel(s)}－${monthLabel(r-1)}（${raw} 個月）`);addLine('不採計留停扣除',`${uncredited} 個月`);addLine('另可併計年資',`${prior} 個月`);addLine('退休審定年資估計',`${credited} 個月（${years.toFixed(2)} 年）`);addLine('初任學歷',EDU[initial].label);events.forEach(x=>addLine(`民國 ${x.y}/${x.m} 改敘${EDU[x.target].label}`,x.point?`核定 ${x.point} 薪點`:`依法提敘 ${x.steps} 級（系統推算）`));addLine('退休時預估薪點',`${timeline.points[timeline.points.length-1]}（${fmt(last)} 元）`);addLine('平均薪額計算月數',`${avgWindow.months} 個月（目標 ${avgYears*12} 個月）`);addLine('平均薪額採計區間',`${monthLabel(avgWindow.from)}－${monthLabel(avgWindow.to)}`);addLine(`最後 ${avgYears} 年平均本（年功）薪`,`${fmt(avg)} 元`);addLine('退休金基數內涵',`${fmt(avg)} × 2＝${fmt(avg*2)} 元`);addLine('一次退休金基數',`${bases.toFixed(2)} 個基數`);addLine('全額一次退休金公式',`${fmt(avg)} × 2 × ${bases.toFixed(2)}＝${fmt(fullLump)} 元`);addLine('月退休金年資給付率',`${(pRate*100).toFixed(2)}%`);addLine('月退法定公式代入',`${fmt(avg)} × 2 × ${(pRate*100).toFixed(2)}%＝${fmt(formula)} 元`);addLine('所得替代率上限',`${(rRate*100).toFixed(2)}%`);addLine('上限公式代入',`${fmt(last)} × 2 × ${(rRate*100).toFixed(2)}%＝${fmt(ceiling)} 元`);addLine('全額月退公式與上限取低',`${fmt(baseMonthly)} 元／月`);if(deduct)addLine(`提前 ${earlyYears.toFixed(2)} 年減額`,`− ${(deduct*100).toFixed(2)}%`);if(monthlyShare)addLine('實際月退休金估計',`${fmt(monthly)} 元／月`);if(lumpShare)addLine('實際一次退休金估計',`${fmt(lump)} 元`);addLine('公保估計給付月數',`${gpiMonths.toFixed(2)} 個月（1.2 × ${years.toFixed(2)}，上限 42）`);addLine('公保一次金公式',`${fmt(last)} × ${gpiMonths.toFixed(2)}＝${fmt(gpi)} 元`);
-      comparison=renderFundComparison({age,years,fullLump,baseMonthly,benefitType,retirementMode});
-      if(schemeTenure.enabled){
-        $('careerIncomePanel').hidden=true;
-        incomeComparison=null;
-      }else incomeComparison=renderCareerIncomeComparison({birthAt:b,workStart:s,initial,events,leaves,prior,currentPoint,currentBase:SALARY[currentPoint]});
+      comparison=renderFundComparison({age,years,benefits:comparisonBenefits,benefitType,retirementMode});
+      const monthlyAtRetirement=({retireAt,years:rawYears,last,avg,excluded:scenarioExcluded})=>{
+        const scenarioTenure=readSchemeTenure({start:s,end:retireAt,excluded:scenarioExcluded,prior,system:'fund'}),scenarioYears=scenarioTenure.enabled?(scenarioTenure.legacyMonths+scenarioTenure.fundMonths)/12:rawYears;
+        if(scenarioTenure.enabled&&scenarioTenure.legacyMonths>0){
+          const best=findMostFavorableSelection({legacyMonths:scenarioTenure.legacyMonths,fundMonths:scenarioTenure.fundMonths,averageSalary:avg,finalSalary:last,preferentialInterest:Math.max(0,Number($('preferentialInterest').value)||0),qualifiedForMonthlyBefore2018:$('qualifiedBefore2018').checked,specialLongServiceTeacher:$('specialLongService').checked,benefitType:'monthly',objective:'monthly'});
+          return{monthly:best?best.netMonthly:0,years:scenarioYears};
+        }
+        return{...calculateFundPension({years:scenarioYears,averageSalary:avg,finalSalary:last}),years:scenarioYears};
+      };
+      incomeComparison=renderCareerIncomeComparison({birthAt:b,workStart:s,initial,events,leaves,prior,currentPoint,currentBase:SALARY[currentPoint],monthlyAtRetirement});
     }else{
       $('careerIncomePanel').hidden=true;
       const vol=Number($('voluntary').value)/100,ret=Number($('returnRate').value)/100,acc=contributionBalance(timeline.salaries,s,excluded,vol,ret);
@@ -280,7 +274,7 @@ function calculate(e,options={}){
 function updateChoiceUI(){
   document.querySelectorAll('.choice-card').forEach(c=>c.classList.toggle('selected',c.querySelector('input').checked));
   const system=document.querySelector('[name=system]:checked').value,benefit=document.querySelector('[name=benefitType]:checked').value,modeGroup=$('retirementModeGroup');
-  modeGroup.hidden=system==='account';const mode=document.querySelector('[name=retirementMode]:checked');if(benefit==='lump'&&['reduced','deferred'].includes(mode.value))document.querySelector('[name=retirementMode][value="full"]').checked=true;
+  modeGroup.hidden=system==='account';$('lumpReturnSettings').hidden=system==='account';const mode=document.querySelector('[name=retirementMode]:checked');if(benefit==='lump'&&['reduced','deferred'].includes(mode.value))document.querySelector('[name=retirementMode][value="full"]').checked=true;
   modeGroup.querySelectorAll('.choice-card').forEach(c=>c.classList.toggle('is-disabled',benefit==='lump'&&['reduced','deferred'].includes(c.querySelector('input').value)));document.querySelectorAll('.choice-card').forEach(c=>c.classList.toggle('selected',c.querySelector('input').checked));
   $('choiceHint').textContent=system==='account'?'個人專戶制的月領金額，須依退休時選定的定額、定率攤提或年金保險方案核算；本工具先呈現可運用專戶總額。':benefit==='lump'?'一次退休金不涉及減額或展期；仍可選擇一般退休或年滿 65 歲的屆齡退休情境。':'高級中等以下學校校長及教師的一般全額月退休金起支年齡以 58 歲估算；特殊身分、命令退休及原住民規定未納入自動判斷。';
 }
@@ -288,10 +282,11 @@ function updateLegacyUI(){
   const fund=document.querySelector('[name=system]:checked').value==='fund',enabled=fund&&$('hasLegacy').checked,mode=document.querySelector('[name=legacyInputMode]:checked').value;
   $('hasLegacy').closest('.legacy-entry').hidden=!fund;$('legacySettings').hidden=!enabled;$('legacyCertifiedFields').hidden=!enabled||mode!=='certifiedMonths';
 }
+function updateReturnUI(){$('lumpReturnRate').disabled=!$('includeLumpReturn').checked;}
 function autoSelectRetirementMode(){
   const birth=readRoc('birth'),retire=readRoc('retire'),benefit=document.querySelector('[name=benefitType]:checked').value;
   if(benefit==='lump'||!validDate(birth)||!validDate(retire)){updateChoiceUI();return;}
-  const age=(monthIndex(retire.y,retire.m)-monthIndex(birth.y,birth.m))/12,mode=age>=58?'full':age>=53?'reduced':'deferred';
+  const age=(monthIndex(retire.y,retire.m)-monthIndex(birth.y,birth.m))/12,mode=age>=65?'mandatory':age>=58?'full':age>=53?'reduced':'deferred';
   document.querySelector(`[name=retirementMode][value="${mode}"]`).checked=true;updateChoiceUI();
 }
 document.querySelectorAll('[name=system]').forEach(r=>r.addEventListener('change',()=>{document.querySelectorAll('.system-card').forEach(c=>c.classList.toggle('selected',c.querySelector('input').checked));document.querySelectorAll('.account-only').forEach(x=>x.hidden=r.value!=='account');updateChoiceUI();updateLegacyUI();}));
@@ -303,8 +298,9 @@ let liveTimer;function scheduleLive(){clearTimeout(liveTimer);$('liveBar').class
 $('calculator').addEventListener('submit',e=>calculate(e,{scroll:true}));$('calculator').addEventListener('input',e=>{if(['birthY','birthM','retireY','retireM'].includes(e.target.id)){updateRetirementLimit();autoSelectRetirementMode()}scheduleLive()});$('calculator').addEventListener('change',scheduleLive);$('editAgain').addEventListener('click',()=>$('calculator').scrollIntoView({behavior:'smooth'}));
 $('earlyCompareAge').addEventListener('change',scheduleLive);$('lateCompareAge').addEventListener('change',scheduleLive);
 $('includeWorkIncome').addEventListener('change',scheduleLive);
+$('includeLumpReturn').addEventListener('change',()=>{updateReturnUI();scheduleLive()});$('lumpReturnRate').addEventListener('input',scheduleLive);
 document.addEventListener('input',e=>{if(e.target.matches('input[inputmode=numeric]'))e.target.value=e.target.value.replace(/\D/g,'');});
-fillSalaryPoints();addEducation({target:'master',y:93,m:8});addLeave({reason:'進修',sy:91,sm:8,ey:93,em:7,credited:false});autoSelectRetirementMode();updateRetirementLimit();updateLegacyUI();calculate(null,{scroll:false});
+fillSalaryPoints();addEducation({target:'master',y:93,m:8});addLeave({reason:'進修',sy:91,sm:8,ey:93,em:7,credited:false});autoSelectRetirementMode();updateRetirementLimit();updateLegacyUI();updateReturnUI();calculate(null,{scroll:false});
 const anchorLinks=Array.from(document.querySelectorAll('.anchor-nav a[href^="#"]'));
 const anchorObserver=new IntersectionObserver(entries=>{const visible=entries.filter(x=>x.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];if(!visible)return;anchorLinks.forEach(link=>{const active=link.hash===`#${visible.target.id}`;link.classList.toggle('active',active);if(active)link.setAttribute('aria-current','step');else link.removeAttribute('aria-current')});},{rootMargin:'-20% 0px -65% 0px',threshold:[0,.1,.5]});
 ['system','profile','leave','benefit','results'].forEach(id=>anchorObserver.observe($(id)));
