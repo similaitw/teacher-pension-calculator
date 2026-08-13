@@ -83,6 +83,7 @@
             <label class="field"><span>初任時學歷</span><select id="education"><option value="bachelor" selected>大學</option><option value="credit40">40 學分班</option><option value="master">碩士</option><option value="phd">博士</option></select></label>
             <label class="field"><span>目前薪級</span><select id="salaryPoint" data-default="650"></select></label>
             <div class="salary-readout"><span>目前本（年功）薪額</span><strong id="salaryAmount">—</strong></div>
+            <label class="field work-income-field"><span>目前每月工作總收入</span><input id="workIncome" type="number" min="0" step="100" value="0" placeholder="0＝以本薪估算"><small>可填本薪、學術研究費與固定加給合計；填 0 時只採本薪。</small></label>
           </div>
           <div class="education-panel">
             <div class="subsection-heading">
@@ -181,6 +182,18 @@
         <div id="breakEvenInsight" class="break-even-insight"></div>
         <div class="comparison-scroll"><table><thead><tr><th>方案</th><th>起領</th><th>一次金</th><th>每月</th><th>58 歲累積</th><th>65 歲累積</th><th>75 歲累積</th><th>85 歲累積</th></tr></thead><tbody id="comparisonRows"></tbody></table></div>
         <p id="comparisonNote" class="comparison-note"></p>
+      </section>
+      <section id="careerIncomePanel" class="career-income-panel">
+        <div class="comparison-head"><div><p class="eyebrow">年度總收入</p><h3>提早月退，還是繼續任職？</h3></div><p>從提早退休當月起，逐年加總工作收入與退休金；不含公保一次金、年終、考績獎金、通膨、稅負及投資收益。</p></div>
+        <div class="income-controls">
+          <label><span>減額退休</span><select id="earlyCompareAge"><option value="53">53 歲</option><option value="54">54 歲</option><option value="55" selected>55 歲</option><option value="56">56 歲</option><option value="57">57 歲</option></select></label>
+          <span class="versus">VS</span>
+          <label><span>延後退休</span><select id="lateCompareAge"><option value="58" selected>58 歲</option><option value="59">59 歲</option><option value="60">60 歲</option><option value="61">61 歲</option><option value="62">62 歲</option><option value="63">63 歲</option><option value="64">64 歲</option><option value="65">65 歲</option></select></label>
+        </div>
+        <div id="incomeCrossInsight" class="income-cross-insight"></div>
+        <div id="incomeSummary" class="income-summary"></div>
+        <details class="income-yearly" open><summary>查看逐年收入與累積差額</summary><div class="income-table-scroll"><table><thead><tr><th>年齡／年度</th><th>減額方案年收入</th><th>延後方案年收入</th><th>減額累積</th><th>延後累積</th><th>延後方案差額</th></tr></thead><tbody id="incomeYearRows"></tbody></table></div></details>
+        <p class="comparison-note">工作收入依薪級路徑逐月推估；「目前每月工作總收入」高於本薪的差額視為固定加給。這是現金流比較，不衡量少工作數年的時間價值。</p>
       </section>
       <div class="breakdown"><h3>計算依據</h3><dl id="breakdownList"></dl></div>
       <details class="salary-audit"><summary>查看年度薪級推估軌跡</summary><div id="salaryTimelineList"></div></details>
