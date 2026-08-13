@@ -41,6 +41,10 @@
         <article><span class="dict-no">08</span><h3>一次退、半月退與月退</h3><p>退休金可選一次退休金、全額月退休金，或二分之一次退休金搭配二分之一月退休金。未達一般月退起支年齡時，可選展期，或最多提前 5 年、每年減發 4% 的減額月退。</p><div class="formula">半月退＝一次退 × 1/2 ＋ 月退 × 1/2</div></article>
         <article><span class="dict-no">09</span><h3>個人專戶制</h3><p>依每月薪級，按本（年功）薪額加一倍乘以法定 15% 與自願增加提繳累積。報酬率是假設值，不是保證收益。</p><div class="formula">每月提撥＝薪額 × 2 × 提撥率</div></article>
         <article><span class="dict-no">10</span><h3>公保一次養老給付</h3><p>目前報表以退休時本（年功）薪額乘以估計給付月數呈現。公保實際保俸、年資與請領方式仍以臺銀公保部及主管機關核定為準。</p></article>
+        <article><span class="dict-no">11</span><h3>舊制年資資料</h3><p>可輸入主管機關核定的舊制年、月，或依教師任職年月由系統切分。核定月數會覆寫逐段推估，避免同一期間重複加入。</p><small>跨公務、政務、軍職或已領給與的年資，應以正式核定資料為準。</small></article>
+        <article><span class="dict-no">12</span><h3>舊制給與公式</h3><p>舊制一次退依年資計算基數，舊制月退依前 15 年每年 5%、其後每年 1% 計算；兼領則各取二分之一。薪額基準與 930 元依條例分開呈現。</p><div class="formula">舊制＋基金制＝分項計算後合併</div></article>
+        <article><span class="dict-no">13</span><h3>年資上限與所得扣減</h3><p>月退合計最高採計 40 年、一次退最高 42 年，舊制另有 30 年上限。退休所得超過替代率上限時，依優惠存款、舊制月退、基金制月退順序扣減。</p><small>畫面會保留扣減前、扣減額與扣減後金額。</small></article>
+        <article><span class="dict-no">14</span><h3>方案比較與黃金交叉</h3><p>一次退、兼領、月退使用同一組審定年資與實領金額。一次金投資報酬預設 0%；年度收入可切換是否納入工作收入，退休生效月只計一種收入。</p><div class="formula">交叉點＝兩方案累積差額由負轉正</div></article>
       </div>
       <aside class="dictionary-warning"><strong>怎麼使用最準？</strong><span>準備敘薪通知書、學歷改敘函、留停核定函、退撫費用繳付證明與可併計年資核定資料，再逐項核對。</span></aside>
     </section>
@@ -52,12 +56,13 @@
         <section class="sheet-summary"><div><span id="reportPrimaryLabel"></span><strong id="reportPrimaryValue"></strong><small id="reportPrimaryUnit"></small></div><div><span id="reportSecondaryLabel"></span><strong id="reportSecondaryValue"></strong><small id="reportSecondaryNote"></small></div></section>
         <section class="sheet-block"><h3>一、基本資料</h3><div id="basicData" class="sheet-data-grid"></div></section>
         <section class="sheet-block"><h3>二、年資計算</h3><div id="tenureData" class="sheet-equation"></div></section>
-        <section class="sheet-block"><h3>三、學歷與薪級時間軸</h3><div id="educationData" class="sheet-table"></div></section>
-        <section class="sheet-block"><h3>四、留職停薪採計明細</h3><div id="leaveData" class="sheet-table"></div></section>
-        <section class="sheet-block"><h3>五、計算明細</h3><div id="calculationData" class="sheet-table"></div></section>
-        <section class="sheet-block"><h3>六、退休方案累積比較</h3><div id="scenarioData" class="scenario-report-table"></div></section>
-        <section class="sheet-block"><h3>七、年度薪級推估軌跡</h3><div id="salaryTimelineData" class="sheet-table"></div></section>
-        <section class="sheet-block conclusion"><h3>八、判讀與限制</h3><p id="eligibilityText"></p><p>本報表為規劃用估值，不是退休審定函。實際年資、薪級、保險年資、退撫給與及留停採計，以服務學校、人事主管機關、退撫基金管理機關及公保承保機關核定為準。</p></section>
+        <section id="schemeBreakdownBlock" class="sheet-block"><h3>三、制度分項與實領給與</h3><div id="schemeData" class="scheme-report-grid"></div><p id="schemeAssumptions" class="scheme-assumptions"></p></section>
+        <section class="sheet-block"><h3>四、學歷與薪級時間軸</h3><div id="educationData" class="sheet-table"></div></section>
+        <section class="sheet-block"><h3>五、留職停薪採計明細</h3><div id="leaveData" class="sheet-table"></div></section>
+        <section class="sheet-block"><h3>六、計算明細</h3><div id="calculationData" class="sheet-table"></div></section>
+        <section id="comparisonReportBlock" class="sheet-block"><h3>七、退休方案累積比較</h3><div id="scenarioData" class="scenario-report-table"></div></section>
+        <section class="sheet-block print-secondary"><h3>八、年度薪級推估軌跡</h3><div id="salaryTimelineData" class="sheet-table"></div></section>
+        <section class="sheet-block conclusion"><h3>九、判讀、待確認與限制</h3><p id="eligibilityText"></p><ul id="pendingItems" class="pending-items"></ul><p>本報表為規劃用估值，不是退休審定函。實際年資、薪級、保險年資、退撫給與及留停採計，以服務學校、人事主管機關、退撫基金管理機關及公保承保機關核定為準。</p></section>
         <footer class="sheet-footer"><span>資料保存在本機瀏覽器</span><span>教師退休試算｜非正式審定</span></footer>
       </article>
       <div id="reportTools" class="report-tools no-print" hidden><button id="printReport" type="button">列印／另存 PDF</button><a href="index.html">修改試算資料</a></div>
