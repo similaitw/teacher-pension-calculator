@@ -37,6 +37,14 @@
     return number;
   }
 
+  function resolvePreferentialDepositInput({mode='monthlyInterest',monthlyInterest=0,principal=0,annualRate=0}={}){
+    if(mode==='monthlyInterest')return Object.freeze({mode,monthlyInterest:nonNegative(monthlyInterest,'每月核定優存利息'),principal:null,annualRate:null,derived:false});
+    if(mode!=='principal')throw new RangeError('優惠存款輸入方式必須是每月利息或核定本金。');
+    const approvedPrincipal=nonNegative(principal,'核定優惠存款本金'),rate=nonNegative(annualRate,'核定優惠存款年利率');
+    if(rate>1)throw new RangeError('核定優惠存款年利率請用小數表示，且不得超過 100%。');
+    return Object.freeze({mode,monthlyInterest:approvedPrincipal*rate/12,principal:approvedPrincipal,annualRate:rate,derived:true});
+  }
+
   function averageSalaryYears(retirementRocYear){
     const year=Math.trunc(finiteNumber(retirementRocYear,'退休民國年度'));
     if(year<=108)return 5;
@@ -334,6 +342,7 @@
     legacyLumpSumBases,
     legacyMonthlyPensionRate,
     pensionBaseContents,
+    resolvePreferentialDepositInput,
     calculateFundPension,
     calculateLegacyPension,
     fundComponentRates,
