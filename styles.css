@@ -118,8 +118,19 @@ body:not(.report-page) .masthead{position:sticky;top:0;z-index:30;background:rgb
 body:not(.report-page) .anchor-nav-wrap{top:101px;z-index:29}
 body:not(.report-page) .live-bar{top:158px;z-index:28}
 body:not(.report-page) #system,body:not(.report-page) #profile,body:not(.report-page) #leave,body:not(.report-page) #benefit,body:not(.report-page) #accountSettings,body:not(.report-page) #results,body:not(.report-page) #comparison{scroll-margin-top:285px}
+
+/* Warm signal palette — make the always-visible answer unmistakable. */
+body:not(.report-page) .live-bar{border-color:#bd624c;background:linear-gradient(128deg,rgba(167,58,40,.98),rgba(113,38,31,.98));box-shadow:0 17px 42px rgba(109,41,31,.28),inset 0 1px 0 rgba(255,255,255,.13)}
+body:not(.report-page) .live-bar span,body:not(.report-page) .live-bar small{color:#f7dfd1}
+body:not(.report-page) .live-status>span{color:#ffdc8a}
+body:not(.report-page) .live-primary{border-color:rgba(255,238,224,.3)}
+body:not(.report-page) .live-meta b{color:#fff}
+body:not(.report-page) .live-bar>a{background:#fff8e9;color:#76291f;box-shadow:0 5px 14px rgba(67,20,15,.2);transition:background .18s,transform .18s,box-shadow .18s}
+body:not(.report-page) .live-bar>a:hover{background:#ffdc8a;transform:translateY(-1px);box-shadow:0 7px 18px rgba(67,20,15,.25)}
+body:not(.report-page) .live-bar.has-error{border-color:#f0a58f;background:linear-gradient(128deg,rgba(113,35,30,.99),rgba(70,24,22,.99))}
 @media(max-width:640px){
   body:not(.report-page) .anchor-nav-wrap{top:67px}
   body:not(.report-page) .live-bar{top:116px}
+  body:not(.report-page) .live-meta{border-top-color:rgba(255,238,224,.3)}
   body:not(.report-page) #system,body:not(.report-page) #profile,body:not(.report-page) #leave,body:not(.report-page) #benefit,body:not(.report-page) #accountSettings,body:not(.report-page) #results,body:not(.report-page) #comparison{scroll-margin-top:230px}
 }
