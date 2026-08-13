@@ -118,7 +118,7 @@ function renderAudit(rows){
   rows.forEach(r=>{const d=document.createElement('div');d.className='audit-row';d.innerHTML=`<span>${r.reason}</span><span>民國 ${r.sy}/${r.sm} — ${r.ey}/${r.em}</span><span class="${r.credited?'yes':'no'}">${r.credited?'採計（已繳付）':'不採計（扣除）'}</span>`;$('leaveAuditList').append(d);});
 }
 function renderCareerIncomeComparison({birthAt,workStart,initial,events,leaves,prior,currentPoint,currentBase}){
-  const panel=$('careerIncomePanel'),earlyAge=Number($('earlyCompareAge').value),lateAge=Number($('lateCompareAge').value),rawIncome=Number($('workIncome').value),enteredIncome=rawIncome>0?rawIncome:currentBase,incomeGap=enteredIncome-currentBase;
+  const panel=$('careerIncomePanel'),earlyAge=Number($('earlyCompareAge').value),lateAge=Number($('lateCompareAge').value),rawIncome=Number($('workIncome').value),enteredIncome=rawIncome>0?rawIncome:currentBase,incomeGap=enteredIncome-currentBase,yearEndMonths=Math.max(0,Number($('yearEndMonths').value)||0),performanceMonths=Math.max(0,Number($('performanceMonths').value)||0),otherAnnualIncome=Math.max(0,Number($('otherAnnualIncome').value)||0),bonusMonths=yearEndMonths+performanceMonths,currentAnnualIncome=enteredIncome*(12+bonusMonths)+otherAnnualIncome;
   panel.hidden=false;
   const excluded=leaves.filter(x=>!x.credited).map(x=>[x.start,x.end]);
   const makeScenario=age=>{
@@ -128,11 +128,11 @@ function renderCareerIncomeComparison({birthAt,workStart,initial,events,leaves,p
     const altEvents=events.filter(x=>x.at<retireAt),timeline=buildSalaryTimeline(initial,altEvents,workStart,retireAt,currentPoint),last=timeline.salaries[timeline.salaries.length-1];
     const retireRocYear=Math.floor(retireAt/12),avgYears=Math.min(15,retireRocYear>=118?15:Math.max(5,retireRocYear-103)),avgWindow=salaryAverageWindow(timeline.salaries,workStart,excluded,avgYears*12),avg=avgWindow.avg;
     const fullMonthly=Math.min(avg*2*pensionRate(years),last*2*replacementRate(years)),deduction=age<58?Math.min(.2,(58-age)*.04):0;
-    return{age,retireAt,years,monthly:fullMonthly*(1-deduction),deduction,workIncome:timeline.salaries.map(value=>Math.max(0,value+incomeGap))};
+    return{age,retireAt,years,monthly:fullMonthly*(1-deduction),deduction,workIncome:timeline.salaries.map(value=>Math.max(0,value+incomeGap)*(1+bonusMonths/12)+otherAnnualIncome/12)};
   };
   const early=makeScenario(earlyAge),late=makeScenario(lateAge),rows=$('incomeYearRows');rows.innerHTML='';$('incomeSummary').innerHTML='';
   if(!early||!late){$('incomeCrossInsight').innerHTML='目前輸入的到職年資不足以建立這組比較。減額月退方案原則上須具備可退休條件且年資滿 15 年；本表並以一般自願退休年資條件檢核。';return null;}
-  const incomeAt=(scenario,at)=>at>=scenario.retireAt?scenario.monthly:scenario.workIncome[at-workStart]||Math.max(0,currentBase+incomeGap);
+  const fallbackWorkIncome=Math.max(0,currentBase+incomeGap)*(1+bonusMonths/12)+otherAnnualIncome/12,incomeAt=(scenario,at)=>at>=scenario.retireAt?scenario.monthly:scenario.workIncome[at-workStart]||fallbackWorkIncome;
   let earlyCum=0,lateCum=0,sawEarlyLead=false,crossoverAt=null;
   for(let at=early.retireAt;at<birthAt+100*12;at++){
     earlyCum+=incomeAt(early,at);lateCum+=incomeAt(late,at);const diff=lateCum-earlyCum;if(diff<0)sawEarlyLead=true;if(sawEarlyLead&&diff>=0){crossoverAt=at+1;break;}
@@ -140,14 +140,14 @@ function renderCareerIncomeComparison({birthAt,workStart,initial,events,leaves,p
   let salaryUntilLate=0;for(let at=early.retireAt;at<late.retireAt;at++)salaryUntilLate+=incomeAt(late,at);
   const crossAge=crossoverAt?(crossoverAt-birthAt)/12:null,crossText=!sawEarlyLead?'延後方案從比較起點即累積較高，沒有先落後再追上的交叉點。':crossAge?`延後退休方案約在 <strong>${crossAge.toFixed(1)} 歲</strong>追上減額提早退休，形成黃金交叉；之後累積總收入較高。`:'計算至 100 歲，延後退休方案仍未追上減額提早退休，沒有黃金交叉。';
   $('incomeCrossInsight').innerHTML=crossText;
-  const summary=[['減額月退',`${fmt(early.monthly)} 元／月`],[`${lateAge} 歲月退`,`${fmt(late.monthly)} 元／月`],['延後期間工作收入',`${fmt(salaryUntilLate)} 元`],['黃金交叉',crossAge?`${crossAge.toFixed(1)} 歲`:sawEarlyLead?'100 歲後／無':'起點即領先']];
+  const summary=[['減額月退',`${fmt(early.monthly)} 元／月`],[`${lateAge} 歲月退`,`${fmt(late.monthly)} 元／月`],['目前全年工作收入',`${fmt(currentAnnualIncome)} 元`],['延後期間工作收入',`${fmt(salaryUntilLate)} 元`],['黃金交叉',crossAge?`${crossAge.toFixed(1)} 歲`:sawEarlyLead?'100 歲後／無':'起點即領先']];
   summary.forEach(([label,value])=>{const card=document.createElement('article');card.innerHTML=`<span>${label}</span><strong>${value}</strong>`;$('incomeSummary').append(card)});
   earlyCum=0;lateCum=0;
   const yearly=[];for(let age=earlyAge;age<85;age++){
     let earlyYear=0,lateYear=0;for(let offset=0;offset<12;offset++){const at=birthAt+age*12+offset;earlyYear+=incomeAt(early,at);lateYear+=incomeAt(late,at);}earlyCum+=earlyYear;lateCum+=lateYear;const diff=lateCum-earlyCum,tr=document.createElement('tr');if(crossAge&&age<=crossAge&&crossAge<age+1)tr.className='cross-row';
     const lateStage=age<lateAge?'工作收入':'月退休金',cells=[`${age}–${age+1} 歲｜民國 ${Math.floor((birthAt+age*12)/12)} 年起`,`${fmt(earlyYear)} 元｜月退`,`${fmt(lateYear)} 元｜${lateStage}`,`${fmt(earlyCum)} 元`,`${fmt(lateCum)} 元`,`${diff>=0?'+':''}${fmt(diff)} 元`];cells.forEach((value,i)=>{const td=document.createElement('td');td.textContent=value;if(i===5)td.className=diff>=0?'positive':'negative';tr.append(td)});rows.append(tr);yearly.push({age,earlyYear,lateYear,earlyCum,lateCum,diff,lateStage});
   }
-  return{earlyAge,lateAge,earlyMonthly:early.monthly,lateMonthly:late.monthly,salaryUntilLate,crossoverAge:crossAge,yearly};
+  return{earlyAge,lateAge,earlyMonthly:early.monthly,lateMonthly:late.monthly,currentAnnualIncome,salaryUntilLate,crossoverAge:crossAge,yearEndMonths,performanceMonths,otherAnnualIncome,yearly};
 }
 function cumulativeAt(scenario,targetAge){return targetAge<scenario.startAge?0:scenario.lump+scenario.monthly*(targetAge-scenario.startAge)*12;}
 function renderFundComparison({age,years,fullLump,baseMonthly,benefitType,retirementMode}){
@@ -225,7 +225,7 @@ function calculate(e,options={}){
     }
     const report={
       version:2,generatedAt:new Date().toISOString(),system,systemLabel:system==='fund'?'退撫基金制':'個人專戶制',
-      input:{birth,start,retire,initialEducation:EDU[initial].label,currentPoint,currentSalary:SALARY[currentPoint],workIncome:Number($('workIncome').value)||SALARY[currentPoint],priorMonths:prior,benefitType,benefitLabel:benefitType==='lump'?'一次退休金':benefitType==='half'?'二分之一次退休金＋二分之一月退休金':'全額月退休金',retirementMode,retirementModeLabel:retirementMode==='full'?'全額月退':retirementMode==='reduced'?'減額月退':retirementMode==='deferred'?'展期月退':'屆齡退休',voluntaryRate:Number($('voluntary').value)/100,returnRate:Number($('returnRate').value)/100},
+      input:{birth,start,retire,initialEducation:EDU[initial].label,currentPoint,currentSalary:SALARY[currentPoint],workIncome:Number($('workIncome').value)||SALARY[currentPoint],yearEndMonths:Number($('yearEndMonths').value)||0,performanceMonths:Number($('performanceMonths').value)||0,otherAnnualIncome:Number($('otherAnnualIncome').value)||0,priorMonths:prior,benefitType,benefitLabel:benefitType==='lump'?'一次退休金':benefitType==='half'?'二分之一次退休金＋二分之一月退休金':'全額月退休金',retirementMode,retirementModeLabel:retirementMode==='full'?'全額月退':retirementMode==='reduced'?'減額月退':retirementMode==='deferred'?'展期月退':'屆齡退休',voluntaryRate:Number($('voluntary').value)/100,returnRate:Number($('returnRate').value)/100},
       educationEvents:events.map(x=>({y:x.y,m:x.m,target:EDU[x.target].label,steps:x.steps,point:x.point})),
       leaves:leaves.map(x=>({reason:x.reason,sy:x.sy,sm:x.sm,ey:x.ey,em:x.em,credited:x.credited})),
       tenure:{rawMonths:raw,uncreditedLeaveMonths:uncredited,priorMonths:prior,creditedMonths:credited,ageMonths:r-b,allLeaveMonths:allLeave},

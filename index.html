@@ -83,7 +83,12 @@
             <label class="field"><span>初任時學歷</span><select id="education"><option value="bachelor" selected>大學</option><option value="credit40">40 學分班</option><option value="master">碩士</option><option value="phd">博士</option></select></label>
             <label class="field"><span>目前薪級</span><select id="salaryPoint" data-default="650"></select></label>
             <div class="salary-readout"><span>目前本（年功）薪額</span><strong id="salaryAmount">—</strong></div>
-            <label class="field work-income-field"><span>目前每月工作總收入</span><input id="workIncome" type="number" min="0" step="100" value="0" placeholder="0＝以本薪估算"><small>可填本薪、學術研究費與固定加給合計；填 0 時只採本薪。</small></label>
+          </div>
+          <div class="income-details">
+            <label class="field"><span>目前每月固定薪給總額</span><input id="workIncome" type="number" min="0" step="100" value="0" placeholder="0＝以本薪估算"><small>填入本薪、學術研究費及固定加給；填 0 時只採本薪。</small></label>
+            <label class="field"><span>年終獎金月數</span><input id="yearEndMonths" type="number" min="0" max="6" step="0.1" value="1.5"><small>預設 1.5 個月，可依實際資格調整。</small></label>
+            <label class="field"><span>考核獎金月數</span><input id="performanceMonths" type="number" min="0" max="6" step="0.5" value="2"><small>最高薪級甲等預設 2 個月；請依考核結果調整。</small></label>
+            <label class="field"><span>其他年度收入</span><input id="otherAnnualIncome" type="number" min="0" step="1000" value="0"><small>鐘點費、未列入月薪的固定收入等；不確定填 0。</small></label>
           </div>
           <div class="education-panel">
             <div class="subsection-heading">
@@ -193,7 +198,7 @@
         <div id="incomeCrossInsight" class="income-cross-insight"></div>
         <div id="incomeSummary" class="income-summary"></div>
         <details class="income-yearly" open><summary>查看逐年收入與累積差額</summary><div class="income-table-scroll"><table><thead><tr><th>年齡／年度</th><th>減額方案年收入</th><th>延後方案年收入</th><th>減額累積</th><th>延後累積</th><th>延後方案差額</th></tr></thead><tbody id="incomeYearRows"></tbody></table></div></details>
-        <p class="comparison-note">工作收入依薪級路徑逐月推估；「目前每月工作總收入」高於本薪的差額視為固定加給。這是現金流比較，不衡量少工作數年的時間價值。</p>
+        <p class="comparison-note">工作收入＝每月固定薪給 ×（12＋年終月數＋考核月數）＋其他年度收入，並依薪級路徑推估。為定位交叉月份，年度獎金平均攤入 12 個月；這是現金流比較，不衡量少工作數年的時間價值。</p>
       </section>
       <div class="breakdown"><h3>計算依據</h3><dl id="breakdownList"></dl></div>
       <details class="salary-audit"><summary>查看年度薪級推估軌跡</summary><div id="salaryTimelineList"></div></details>
