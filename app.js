@@ -25,6 +25,26 @@ function fillSalaryPoints(){
   });
   $('salaryPoint').value=LADDER.includes(previous)?previous:450;updateSalary();
 }
+function fillDateSelects(){
+  const now=new Date(),currentYear=now.getFullYear()-1911,currentMonth=now.getMonth()+1;
+  const fillYearSelect=(selectId,minYear,maxYear,defaultValue)=>{
+    const select=$(selectId);select.innerHTML='';
+    for(let y=maxYear;y>=minYear;y--){
+      const o=document.createElement('option');o.value=y;o.textContent=`${y} 年`;select.append(o);
+    }
+    select.value=defaultValue;
+  };
+  const fillMonthSelect=(selectId,defaultValue)=>{
+    const select=$(selectId);select.innerHTML='';
+    for(let m=1;m<=12;m++){
+      const o=document.createElement('option');o.value=m;o.textContent=`${String(m).padStart(2,'0')} 月`;select.append(o);
+    }
+    select.value=defaultValue;
+  };
+  fillYearSelect('birthY',1,130,65);fillMonthSelect('birthM',12);
+  fillYearSelect('startY',1,130,88);fillMonthSelect('startM',8);
+  fillYearSelect('retireY',1,130,124);fillMonthSelect('retireM',8);
+}
 function updateSalary(){$('salaryAmount').textContent=`${fmt(SALARY[$('salaryPoint').value])} 元`;}
 function pointOptions(select,target,selected=''){
   const current=selected||select.value;select.innerHTML='<option value="">不清楚，由系統依法推算</option>';
@@ -322,7 +342,7 @@ $('earlyCompareAge').addEventListener('change',scheduleLive);$('lateCompareAge')
 $('includeWorkIncome').addEventListener('change',scheduleLive);
 $('includeLumpReturn').addEventListener('change',()=>{updateReturnUI();scheduleLive()});$('lumpReturnRate').addEventListener('input',scheduleLive);
 document.addEventListener('input',e=>{if(e.target.matches('input[inputmode=numeric]'))e.target.value=e.target.value.replace(/\D/g,'');});
-fillSalaryPoints();addEducation({target:'master',y:93,m:8});addLeave({reason:'進修',sy:91,sm:8,ey:93,em:7,credited:false});autoSelectRetirementMode();updateRetirementLimit();updateLegacyUI();updatePreferentialUI();updateReturnUI();calculate(null,{scroll:false});
+fillDateSelects();fillSalaryPoints();addEducation({target:'master',y:93,m:8});addLeave({reason:'進修',sy:91,sm:8,ey:93,em:7,credited:false});autoSelectRetirementMode();updateRetirementLimit();updateLegacyUI();updatePreferentialUI();updateReturnUI();calculate(null,{scroll:false});
 const anchorLinks=Array.from(document.querySelectorAll('.anchor-nav a[href^="#"]'));
 const anchorObserver=new IntersectionObserver(entries=>{const visible=entries.filter(x=>x.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];if(!visible)return;anchorLinks.forEach(link=>{const active=link.hash===`#${visible.target.id}`;link.classList.toggle('active',active);if(active)link.setAttribute('aria-current','step');else link.removeAttribute('aria-current')});},{rootMargin:'-20% 0px -65% 0px',threshold:[0,.1,.5]});
 ['system','profile','leave','benefit','results'].forEach(id=>anchorObserver.observe($(id)));
