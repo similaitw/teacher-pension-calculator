@@ -70,7 +70,7 @@
           <div class="field-grid three">
             <fieldset class="field"><legend>出生年月</legend><div class="roc-date"><input id="birthY" inputmode="numeric" value="65" aria-label="出生民國年"><span>年</span><input id="birthM" inputmode="numeric" value="12" aria-label="出生月"><span>月</span></div></fieldset>
             <fieldset class="field"><legend>正式到職年月</legend><div class="roc-date"><input id="startY" inputmode="numeric" value="88" aria-label="到職民國年"><span>年</span><input id="startM" inputmode="numeric" value="8" aria-label="到職月"><span>月</span></div></fieldset>
-            <fieldset class="field"><legend>預計退休年月</legend><div class="roc-date"><input id="retireY" inputmode="numeric" value="124" aria-label="退休民國年"><span>年</span><input id="retireM" inputmode="numeric" value="8" aria-label="退休月"><span>月</span></div></fieldset>
+            <fieldset id="retirementField" class="field"><legend>預計退休年月</legend><div class="roc-date"><input id="retireY" type="number" min="1" max="130" step="1" value="124" aria-label="退休民國年" aria-describedby="retirementLimitHint"><span>年</span><input id="retireM" type="number" min="1" max="12" step="1" value="8" aria-label="退休月" aria-describedby="retirementLimitHint"><span>月</span></div><small id="retirementLimitHint" class="retirement-limit-hint">最晚可填至年滿 65 歲當月。</small></fieldset>
           </div>
           <div class="field-grid salary-row">
             <label class="field"><span>初任時學歷</span><select id="education"><option value="bachelor" selected>大學</option><option value="credit40">40 學分班</option><option value="master">碩士</option><option value="phd">博士</option></select></label>

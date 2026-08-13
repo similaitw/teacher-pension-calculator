@@ -45,6 +45,13 @@ function addLeave(values={}){
 }
 function readRoc(prefix){return{y:Number($(prefix+'Y').value),m:Number($(prefix+'M').value)};}
 function validDate(d){return Number.isInteger(d.y)&&d.y>=1&&d.y<=200&&Number.isInteger(d.m)&&d.m>=1&&d.m<=12;}
+function updateRetirementLimit(){
+  const birth=readRoc('birth'),retire=readRoc('retire'),field=$('retirementField'),hint=$('retirementLimitHint');
+  if(!validDate(birth)){hint.textContent='出生年月完整後，會顯示年滿 65 歲的最晚退休年月。';field.classList.remove('is-over-limit');return false;}
+  const limit={y:birth.y+65,m:birth.m},over=validDate(retire)&&monthIndex(retire.y,retire.m)>monthIndex(limit.y,limit.m);
+  $('retireY').max=limit.y;hint.textContent=over?`已超過屆齡上限；最晚只能填民國 ${limit.y} 年 ${limit.m} 月。`:`屆齡上限：最晚民國 ${limit.y} 年 ${limit.m} 月（年滿 65 歲當月）。`;
+  field.classList.toggle('is-over-limit',over);$('retireY').setAttribute('aria-invalid',String(over));$('retireM').setAttribute('aria-invalid',String(over));return over;
+}
 function mergeIntervals(intervals){
   const sorted=intervals.filter(x=>x[1]>x[0]).sort((a,b)=>a[0]-b[0]),out=[];
   sorted.forEach(x=>{const last=out[out.length-1];if(!last||x[0]>last[1])out.push([...x]);else last[1]=Math.max(last[1],x[1]);});return out;
@@ -188,6 +195,7 @@ function calculate(e,options={}){
   if(e)e.preventDefault();$('formError').textContent='';
   try{
     const birth=readRoc('birth'),start=readRoc('start'),retire=readRoc('retire');if(!validDate(birth)||!validDate(start)||!validDate(retire))throw new Error('請確認出生、到職與退休年月。');
+    if(updateRetirementLimit())throw new Error(`預計退休年月不得晚於年滿 65 歲當月（民國 ${birth.y+65} 年 ${birth.m} 月）。`);
     const b=monthIndex(birth.y,birth.m),s=monthIndex(start.y,start.m),r=monthIndex(retire.y,retire.m);if(s<=b||r<=s)throw new Error('退休年月必須晚於到職年月，到職年月也必須晚於出生年月。');
     const initial=$('education').value,events=readEducationEvents(initial,s,r),leaves=readLeaves(s,r),raw=duration(s,r),allLeave=overlapMonths(leaves.map(x=>[x.start,x.end]),s,r),excluded=leaves.filter(x=>!x.credited).map(x=>[x.start,x.end]),uncredited=overlapMonths(excluded,s,r);
     const prior=Number($('priorYears').value||0)*12+Number($('priorMonths').value||0);if(prior<0)throw new Error('可併計年資不能是負數。');
@@ -248,10 +256,10 @@ document.querySelectorAll('[name=benefitType],[name=retirementMode]').forEach(r=
 $('salaryPoint').addEventListener('change',updateSalary);$('addEducation').addEventListener('click',()=>addEducation());$('addLeave').addEventListener('click',()=>addLeave());
 $('voluntary').addEventListener('input',e=>$('voluntaryOut').textContent=Number(e.target.value).toFixed(2)+'%');$('returnRate').addEventListener('input',e=>$('returnOut').textContent=Number(e.target.value).toFixed(2)+'%');
 let liveTimer;function scheduleLive(){clearTimeout(liveTimer);$('liveBar').classList.add('is-updating');liveTimer=setTimeout(()=>calculate(null,{scroll:false}),180);}
-$('calculator').addEventListener('submit',e=>calculate(e,{scroll:true}));$('calculator').addEventListener('input',scheduleLive);$('calculator').addEventListener('change',scheduleLive);$('editAgain').addEventListener('click',()=>$('calculator').scrollIntoView({behavior:'smooth'}));
+$('calculator').addEventListener('submit',e=>calculate(e,{scroll:true}));$('calculator').addEventListener('input',e=>{if(['birthY','birthM','retireY','retireM'].includes(e.target.id))updateRetirementLimit();scheduleLive()});$('calculator').addEventListener('change',scheduleLive);$('editAgain').addEventListener('click',()=>$('calculator').scrollIntoView({behavior:'smooth'}));
 $('earlyCompareAge').addEventListener('change',scheduleLive);$('lateCompareAge').addEventListener('change',scheduleLive);
 document.addEventListener('input',e=>{if(e.target.matches('input[inputmode=numeric]'))e.target.value=e.target.value.replace(/\D/g,'');});
-fillSalaryPoints();addEducation({target:'master',y:93,m:8});addLeave({reason:'進修',sy:91,sm:8,ey:93,em:7,credited:false});updateChoiceUI();calculate(null,{scroll:false});
+fillSalaryPoints();addEducation({target:'master',y:93,m:8});addLeave({reason:'進修',sy:91,sm:8,ey:93,em:7,credited:false});updateChoiceUI();updateRetirementLimit();calculate(null,{scroll:false});
 const anchorLinks=Array.from(document.querySelectorAll('.anchor-nav a[href^="#"]'));
 const anchorObserver=new IntersectionObserver(entries=>{const visible=entries.filter(x=>x.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];if(!visible)return;anchorLinks.forEach(link=>{const active=link.hash===`#${visible.target.id}`;link.classList.toggle('active',active);if(active)link.setAttribute('aria-current','step');else link.removeAttribute('aria-current')});},{rootMargin:'-20% 0px -65% 0px',threshold:[0,.1,.5]});
 ['system','profile','leave','benefit','results'].forEach(id=>anchorObserver.observe($(id)));
