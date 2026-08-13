@@ -8,7 +8,9 @@ test('預設基金制即時計算、手機寬度與報表一致',async({page})=>
   expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBe(360);
   await page.goto('/report.html');
   await expect(page.locator('#reportPrimaryValue')).toHaveText('75,182');
-  expect(await page.locator('.report-jump a').evaluateAll(links=>links.map(link=>link.getAttribute('href')))).toEqual(['#generatedReport','#dictionary']);
+  await expect(page.locator('.report-toolbar h1')).toHaveText('我的報表');
+  expect(await page.locator('.report-jump a').evaluateAll(links=>links.map(link=>link.getAttribute('href')))).toEqual(['#dictionary']);
+  expect(await page.locator('.report-main').evaluate(main=>Array.from(main.children).sort((a,b)=>getComputedStyle(a).order-getComputedStyle(b).order).slice(0,3).map(node=>node.id||node.classList[0]))).toEqual(['report-toolbar','generatedReport','dictionary']);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBe(360);
 });
 
