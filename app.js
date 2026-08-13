@@ -251,16 +251,22 @@ function updateChoiceUI(){
   modeGroup.querySelectorAll('.choice-card').forEach(c=>c.classList.toggle('is-disabled',benefit==='lump'&&['reduced','deferred'].includes(c.querySelector('input').value)));document.querySelectorAll('.choice-card').forEach(c=>c.classList.toggle('selected',c.querySelector('input').checked));
   $('choiceHint').textContent=system==='account'?'個人專戶制的月領金額，須依退休時選定的定額、定率攤提或年金保險方案核算；本工具先呈現可運用專戶總額。':benefit==='lump'?'一次退休金不涉及減額或展期；仍可選擇一般退休或年滿 65 歲的屆齡退休情境。':'高級中等以下學校校長及教師的一般全額月退休金起支年齡以 58 歲估算；特殊身分、命令退休及原住民規定未納入自動判斷。';
 }
+function autoSelectRetirementMode(){
+  const birth=readRoc('birth'),retire=readRoc('retire'),benefit=document.querySelector('[name=benefitType]:checked').value;
+  if(benefit==='lump'||!validDate(birth)||!validDate(retire)){updateChoiceUI();return;}
+  const age=(monthIndex(retire.y,retire.m)-monthIndex(birth.y,birth.m))/12,mode=age>=58?'full':age>=53?'reduced':'deferred';
+  document.querySelector(`[name=retirementMode][value="${mode}"]`).checked=true;updateChoiceUI();
+}
 document.querySelectorAll('[name=system]').forEach(r=>r.addEventListener('change',()=>{document.querySelectorAll('.system-card').forEach(c=>c.classList.toggle('selected',c.querySelector('input').checked));document.querySelectorAll('.account-only').forEach(x=>x.hidden=r.value!=='account');updateChoiceUI();}));
 document.querySelectorAll('[name=benefitType],[name=retirementMode]').forEach(r=>r.addEventListener('change',updateChoiceUI));
 $('salaryPoint').addEventListener('change',updateSalary);$('addEducation').addEventListener('click',()=>addEducation());$('addLeave').addEventListener('click',()=>addLeave());
 $('voluntary').addEventListener('input',e=>$('voluntaryOut').textContent=Number(e.target.value).toFixed(2)+'%');$('returnRate').addEventListener('input',e=>$('returnOut').textContent=Number(e.target.value).toFixed(2)+'%');
 let liveTimer;function scheduleLive(){clearTimeout(liveTimer);$('liveBar').classList.add('is-updating');liveTimer=setTimeout(()=>calculate(null,{scroll:false}),180);}
-$('calculator').addEventListener('submit',e=>calculate(e,{scroll:true}));$('calculator').addEventListener('input',e=>{if(['birthY','birthM','retireY','retireM'].includes(e.target.id))updateRetirementLimit();scheduleLive()});$('calculator').addEventListener('change',scheduleLive);$('editAgain').addEventListener('click',()=>$('calculator').scrollIntoView({behavior:'smooth'}));
+$('calculator').addEventListener('submit',e=>calculate(e,{scroll:true}));$('calculator').addEventListener('input',e=>{if(['birthY','birthM','retireY','retireM'].includes(e.target.id)){updateRetirementLimit();autoSelectRetirementMode()}scheduleLive()});$('calculator').addEventListener('change',scheduleLive);$('editAgain').addEventListener('click',()=>$('calculator').scrollIntoView({behavior:'smooth'}));
 $('earlyCompareAge').addEventListener('change',scheduleLive);$('lateCompareAge').addEventListener('change',scheduleLive);
 $('includeWorkIncome').addEventListener('change',scheduleLive);
 document.addEventListener('input',e=>{if(e.target.matches('input[inputmode=numeric]'))e.target.value=e.target.value.replace(/\D/g,'');});
-fillSalaryPoints();addEducation({target:'master',y:93,m:8});addLeave({reason:'進修',sy:91,sm:8,ey:93,em:7,credited:false});updateChoiceUI();updateRetirementLimit();calculate(null,{scroll:false});
+fillSalaryPoints();addEducation({target:'master',y:93,m:8});addLeave({reason:'進修',sy:91,sm:8,ey:93,em:7,credited:false});autoSelectRetirementMode();updateRetirementLimit();calculate(null,{scroll:false});
 const anchorLinks=Array.from(document.querySelectorAll('.anchor-nav a[href^="#"]'));
 const anchorObserver=new IntersectionObserver(entries=>{const visible=entries.filter(x=>x.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];if(!visible)return;anchorLinks.forEach(link=>{const active=link.hash===`#${visible.target.id}`;link.classList.toggle('active',active);if(active)link.setAttribute('aria-current','step');else link.removeAttribute('aria-current')});},{rootMargin:'-20% 0px -65% 0px',threshold:[0,.1,.5]});
 ['system','profile','leave','benefit','results'].forEach(id=>anchorObserver.observe($(id)));
