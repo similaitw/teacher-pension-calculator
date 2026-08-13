@@ -178,6 +178,151 @@
     });
   }
 
+  function fundComponentRates(fundMonths,legacyMonths=0){
+    const fund=wholeMonths(fundMonths,'基金制年資');
+    const legacy=wholeMonths(legacyMonths,'舊制年資');
+    let monthlyRate=0,lumpBases=0;
+    for(let month=1;month<=fund;month++){
+      const totalOrdinal=legacy+month;
+      monthlyRate+=totalOrdinal<=35*12?.02/12:.01/12;
+      lumpBases+=totalOrdinal<=35*12?1.5/12:1/12;
+    }
+    if(fund>0&&legacy<35*12&&legacy+fund>=35*12)lumpBases+=.5;
+    return Object.freeze({
+      monthlyRate:Math.min(.75,monthlyRate),
+      lumpBases:Math.min(60,lumpBases)
+    });
+  }
+
+  function enumerateServiceSelections({legacyMonths,fundMonths,benefitType='monthly'}){
+    const legacy=wholeMonths(legacyMonths,'可用舊制年資');
+    const fund=wholeMonths(fundMonths,'可用基金制年資');
+    if(!['lump','half','monthly'].includes(benefitType))throw new RangeError(`未知退休金種類：${benefitType}`);
+    const totalCap=benefitType==='lump'?42*12:40*12;
+    const legacyCap=30*12;
+    const target=Math.min(totalCap,Math.min(legacy,legacyCap)+fund);
+    const minLegacy=Math.max(0,target-fund);
+    const maxLegacy=Math.min(legacy,legacyCap,target);
+    const selections=[];
+    for(let selectedLegacy=minLegacy;selectedLegacy<=maxLegacy;selectedLegacy++){
+      const selectedFund=target-selectedLegacy;
+      selections.push(Object.freeze({
+        legacyMonths:selectedLegacy,
+        fundMonths:selectedFund,
+        totalMonths:target,
+        droppedLegacyMonths:legacy-selectedLegacy,
+        droppedFundMonths:fund-selectedFund
+      }));
+    }
+    return Object.freeze(selections);
+  }
+
+  function applyIncomeReplacementCeiling({
+    preferentialInterest=0,
+    legacyMonthly=0,
+    fundMonthly=0,
+    finalSalary,
+    totalCreditedMonths,
+    monthlyShare=1
+  }){
+    const preferential=nonNegative(preferentialInterest,'每月優惠存款利息');
+    const legacy=nonNegative(legacyMonthly,'舊制月退休金');
+    const fund=nonNegative(fundMonthly,'基金制月退休金');
+    const final=nonNegative(finalSalary,'最後在職薪額');
+    const months=wholeMonths(totalCreditedMonths,'退休審定總年資');
+    const share=nonNegative(monthlyShare,'月退休金比例');
+    if(share>1)throw new RangeError('月退休金比例不得超過 1。');
+    const rate=replacementRate(months/12);
+    const ceiling=final*2*rate*share;
+    const before=preferential+legacy+fund;
+    let excess=Math.max(0,before-ceiling);
+    const preferentialDeduction=Math.min(preferential,excess);excess-=preferentialDeduction;
+    const legacyDeduction=Math.min(legacy,excess);excess-=legacyDeduction;
+    const fundDeduction=Math.min(fund,excess);excess-=fundDeduction;
+    const deductions=Object.freeze({
+      preferentialInterest:preferentialDeduction,
+      legacyMonthly:legacyDeduction,
+      fundMonthly:fundDeduction,
+      total:preferentialDeduction+legacyDeduction+fundDeduction
+    });
+    const after=Object.freeze({
+      preferentialInterest:preferential-preferentialDeduction,
+      legacyMonthly:legacy-legacyDeduction,
+      fundMonthly:fund-fundDeduction,
+      total:before-deductions.total
+    });
+    return Object.freeze({rate,monthlyShare:share,ceiling,before,deductions,after,unresolvedExcess:excess});
+  }
+
+  function calculateMixedPensionCandidate({
+    selection,
+    averageSalary,
+    finalSalary,
+    benefitType='monthly',
+    preferentialInterest=0,
+    qualifiedForMonthlyBefore2018=false,
+    specialLongServiceTeacher=false
+  }){
+    if(!selection||typeof selection!=='object')throw new TypeError('必須提供年資選擇。');
+    const legacyMonths=wholeMonths(selection.legacyMonths,'選用舊制年資');
+    const fundMonths=wholeMonths(selection.fundMonths,'選用基金制年資');
+    const totalMonths=legacyMonths+fundMonths;
+    const legacy=calculateLegacyPension({
+      legacyMonths,totalCreditedMonths:totalMonths,averageSalary,finalSalary,benefitType,
+      qualifiedForMonthlyBefore2018,specialLongServiceTeacher
+    });
+    if(!legacy.eligible)return Object.freeze({eligible:false,reason:legacy.reason,selection,legacy});
+    const baseContents=pensionBaseContents({averageSalary,finalSalary,qualifiedForMonthlyBefore2018});
+    const fundRates=fundComponentRates(fundMonths,legacyMonths);
+    const fullFundLump=baseContents.fund*fundRates.lumpBases;
+    const fullFundMonthly=baseContents.fund*fundRates.monthlyRate;
+    const lumpShare=benefitType==='lump'?1:benefitType==='half'?.5:0;
+    const monthlyShare=benefitType==='monthly'?1:benefitType==='half'?.5:0;
+    const fund=Object.freeze({
+      months:fundMonths,
+      lumpBases:fundRates.lumpBases,
+      monthlyRate:fundRates.monthlyRate,
+      fullLump:fullFundLump,
+      fullMonthly:fullFundMonthly,
+      lump:fullFundLump*lumpShare,
+      monthly:fullFundMonthly*monthlyShare
+    });
+    const ceiling=monthlyShare?applyIncomeReplacementCeiling({
+      preferentialInterest,
+      legacyMonthly:legacy.monthly,
+      fundMonthly:fund.monthly,
+      finalSalary,
+      totalCreditedMonths:totalMonths,
+      monthlyShare
+    }):null;
+    return Object.freeze({
+      eligible:true,
+      reason:null,
+      benefitType,
+      selection:Object.freeze({...selection,legacyMonths,fundMonths,totalMonths}),
+      legacy,
+      fund,
+      grossLump:legacy.lump+fund.lump,
+      grossMonthly:legacy.monthly+fund.monthly+nonNegative(preferentialInterest,'每月優惠存款利息'),
+      ceiling,
+      netMonthly:ceiling?ceiling.after.total:0
+    });
+  }
+
+  function evaluateServiceSelections(options){
+    const selections=enumerateServiceSelections(options);
+    return Object.freeze(selections.map(selection=>calculateMixedPensionCandidate({...options,selection})));
+  }
+
+  function findMostFavorableSelection(options){
+    const objective=options.objective||((options.benefitType||'monthly')==='lump'?'lump':'monthly');
+    if(!['lump','monthly'].includes(objective))throw new RangeError(`未知比較目標：${objective}`);
+    const candidates=evaluateServiceSelections(options).filter(candidate=>candidate.eligible);
+    if(!candidates.length)return null;
+    const value=candidate=>objective==='lump'?candidate.grossLump:candidate.netMonthly;
+    return candidates.reduce((best,candidate)=>value(candidate)>value(best)?candidate:best);
+  }
+
   return Object.freeze({
     RULES_VERSION,
     LEGAL_RULES,
@@ -190,6 +335,12 @@
     legacyMonthlyPensionRate,
     pensionBaseContents,
     calculateFundPension,
-    calculateLegacyPension
+    calculateLegacyPension,
+    fundComponentRates,
+    enumerateServiceSelections,
+    applyIncomeReplacementCeiling,
+    calculateMixedPensionCandidate,
+    evaluateServiceSelections,
+    findMostFavorableSelection
   });
 });
