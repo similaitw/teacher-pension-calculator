@@ -56,7 +56,23 @@
               <small>估算專戶累積本金與投資收益</small>
             </label>
           </div>
-          <div class="old-system-note">85 年 2 月 1 日以前已有可採計年資者，涉及新舊制與優惠存款，本工具不提供金額試算，請洽人事室。</div>
+          <label class="legacy-entry fund-only"><input id="hasLegacy" type="checkbox"><span><strong>我有民國 85 年 2 月以前的可採計年資</strong><small>開啟舊制＋基金制合併試算；核定資料永遠優先。</small></span></label>
+          <div id="legacySettings" class="legacy-settings fund-only" hidden>
+            <div class="legacy-heading"><div><p class="eyebrow">舊制年資</p><h3>選擇資料來源</h3></div><span>LEGACY SERVICE</span></div>
+            <div class="legacy-mode" role="radiogroup" aria-label="舊制年資輸入方式">
+              <label><input type="radio" name="legacyInputMode" value="certifiedMonths" checked><span><b>依核定年資輸入</b><small>建議使用人事室或審定資料</small></span></label>
+              <label><input type="radio" name="legacyInputMode" value="segments"><span><b>依到職年月切分</b><small>以正式到職至退休時間軸估算</small></span></label>
+            </div>
+            <div id="legacyCertifiedFields" class="legacy-grid">
+              <label class="field"><span>核定舊制年資</span><div class="inline-number"><input id="legacyYears" type="number" min="0" max="40" step="1" value="0"><span>年</span><input id="legacyMonths" type="number" min="0" max="11" step="1" value="0"><span>月</span></div></label>
+              <label class="field"><span>每月核定優存利息</span><input id="preferentialInterest" type="number" min="0" step="100" value="0"><small>沒有正式核定值請填 0。</small></label>
+            </div>
+            <div class="legacy-flags">
+              <label><input id="qualifiedBefore2018" type="checkbox"><span>107/7/1 前已符合月退資格<small>勾選後改採最後在職薪額基準</small></span></label>
+              <label><input id="specialLongService" type="checkbox"><span>具特殊長期服務教師／校長資格<small>須有主管機關認定，不會自動判斷</small></span></label>
+            </div>
+            <p class="legacy-footnote">其他可併計年資目前歸入基金制；跨公務、政務或軍職的舊制年資，請優先輸入正式核定舊制月數。</p>
+          </div>
         </div>
       </section>
 
@@ -175,6 +191,7 @@
         <article class="result-card"><p>留停總期間</p><strong id="leaveTotal">—</strong><small id="leaveSummary">—</small></article>
         <article class="result-card"><p id="secondaryLabel">公保一次金估計</p><strong id="secondaryValue">—</strong><small id="secondaryNote">—</small></article>
       </div>
+      <div id="schemeTenure" class="scheme-tenure"><div><span>舊制年資</span><strong id="legacyTenure">—</strong></div><div><span>基金制年資</span><strong id="fundTenure">—</strong></div><div><span>個人專戶制年資</span><strong id="accountTenure">—</strong></div><div><span>可採計合計</span><strong id="schemeTenureTotal">—</strong></div><div class="selection-card"><span>年資取捨</span><strong id="selectionSummary">—</strong></div></div>
       <section id="comparison" class="comparison-panel">
         <div class="comparison-head"><div><p class="eyebrow">方案窮舉</p><h3>哪一種領法，何時比較有利？</h3></div><p>以目前輸入的同一退休年月比較；累積金額不含公保一次金、通膨、利息與稅負。</p></div>
         <div id="breakEvenInsight" class="break-even-insight"></div>
@@ -204,7 +221,7 @@
       <p class="eyebrow">使用前請讀</p>
       <h2>法律規則會變，紀錄也可能不完整。</h2>
       <div class="source-grid">
-        <p>本工具以月份估算，已納入一般減額、展期與屆齡情境；未處理日數、舊制年資、年資重疊、特殊身分或因公命令退休。若留停跨月但只涵蓋部分日期，正式核定可能不同。</p>
+        <p>本工具以月份估算，已納入一般舊制＋基金制年資、減額、展期與屆齡情境；尚未處理日數、跨職域舊制逐段明細、年資重疊、特殊身分或因公命令退休。若留停跨月但只涵蓋部分日期，正式核定可能不同。</p>
         <ul>
           <li><a href="https://edu.law.moe.gov.tw/LawContent.aspx?id=GL001661" target="_blank" rel="noopener">公立學校教職員退休資遣撫卹條例</a></li>
           <li><a href="https://edu.law.moe.gov.tw/LawContent.aspx?id=GL002197" target="_blank" rel="noopener">公立學校教職員個人專戶制退休資遣撫卹條例</a></li>
@@ -236,6 +253,7 @@
     </article>
   </template>
   <script src="pension-rules.js"></script>
+  <script src="service-tenure.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
