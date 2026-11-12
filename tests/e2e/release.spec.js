@@ -32,12 +32,12 @@ test('舊制與核定優存本金即時計算並同步報表',async({page})=>{
 
 test('55 歲、58 歲與 65 歲只列出合法情境',async({page})=>{
   await page.goto('/');
-  await page.locator('#retireY').fill('121');
+  await page.locator('#retireY').selectOption('121');
   await expect(page.locator('#comparisonRows tr')).toHaveCount(5);
   await expect(page.locator('#comparisonRows')).toContainText('月退｜減額');
   await expect(page.locator('#comparisonRows')).toContainText('月退｜展期');
-  await page.locator('#retireY').fill('130');
-  await page.locator('#retireM').fill('12');
+  await page.locator('#retireY').selectOption('130');
+  await page.locator('#retireM').selectOption('12');
   await expect(page.locator('#comparisonRows tr')).toHaveCount(3);
   await expect(page.locator('#comparisonRows')).toContainText('月退｜屆齡');
   await expect(page.locator('[name="retirementMode"][value="mandatory"]')).toBeChecked();
