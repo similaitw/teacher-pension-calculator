@@ -5,7 +5,7 @@
 })(typeof globalThis!=='undefined'?globalThis:this,function(){
   function assertNumber(value,label){if(!Number.isFinite(value))throw new TypeError(`${label} 必須是有限數字`);}
 
-  function enumeratePensionScenarios({retirementAge,years,benefits,selectedType='monthly',selectedMode='full'}){
+  function enumeratePensionScenarios({retirementAge,years,benefits,selectedType='monthly',selectedMode='full',ordered=false}){
     assertNumber(retirementAge,'退休年齡');assertNumber(years,'年資');
     const scenarios=[];
     const add=(type,mode,label,startAge,deduction=0)=>{
@@ -17,11 +17,14 @@
         selected:type===selectedType&&(type==='lump'||mode===selectedMode)
       });
     };
-    add('lump',retirementAge>=65?'mandatory':'full',retirementAge>=65?'一次退｜屆齡':'一次退｜一般',retirementAge);
+    if(ordered)add('lump','ordered','一次退｜命令',retirementAge);
+    else add('lump',retirementAge>=65?'mandatory':'full',retirementAge>=65?'一次退｜屆齡':'一次退｜一般',retirementAge);
     if(years>=15){
       ['half','monthly'].forEach(type=>{
         const name=type==='half'?'半月退':'月退';
-        if(retirementAge>=65)add(type,'mandatory',`${name}｜屆齡`,retirementAge);
+        // 命令退休不適用第 32 條起支年齡：自退休生效日起支，無減額或展期。
+        if(ordered)add(type,'ordered',`${name}｜命令`,retirementAge);
+        else if(retirementAge>=65)add(type,'mandatory',`${name}｜屆齡`,retirementAge);
         else if(retirementAge>=58)add(type,'full',`${name}｜全額`,retirementAge);
         else{
           if(retirementAge>=53)add(type,'reduced',`${name}｜減額`,retirementAge,Math.min(.2,(58-retirementAge)*.04));

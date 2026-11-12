@@ -17,8 +17,61 @@
     legacyBenefitFormula:'第 29 條及退撫新制實施前年資退休金支給標準表',
     fundBenefitFormula:'第 30 條',
     replacementRateBasis:'第 37、38 條及附表三（統一採民國 112 年欄）',
-    legacyBaseContent:'第 28 條（舊制一次退加 930 元；舊制月退另十足發給 930 元）'
+    legacyBaseContent:'第 28 條（舊制一次退加 930 元；舊制月退另十足發給 930 元）',
+    voluntaryRetirement:'第 18 條第 1 項（任職滿 5 年年滿 60 歲，或任職滿 25 年；原住民 60 歲降為 55 歲）',
+    orderedRetirement:'第 22、23、31、33 條（命令退休、因公傷病年資保障、加發基數與不適用所得上限）',
+    specialLongService:'第 15 條第 2 項、第 29 條第 2 項（限本條例施行前退休生效者）',
+    fractionalService:'第 29、30、37 條（畸零月數按比率計給，未滿一個月以一個月計）；施行細則第 10 條（任職年資按日十足計算）'
   });
+
+  // 本條例施行日：民國 107 年 7 月 1 日；以「民國年×12＋月−1」月份索引表示。
+  const ACT_EFFECTIVE_MONTH=107*12+7-1;
+
+  function isBeforeActEffective(retireRocYear,retireMonth){
+    return Number(retireRocYear)*12+Number(retireMonth)-1<ACT_EFFECTIVE_MONTH;
+  }
+
+  // 第 18 條第 1 項：任職滿 5 年年滿 60 歲（原住民 55 歲），或任職滿 25 年。
+  function voluntaryRetirementAge({indigenous=false}={}){return indigenous?55:60;}
+  function isVoluntaryRetirementEligible({years,age,indigenous=false}){
+    const y=finiteNumber(years,'任職年資'),a=finiteNumber(age,'退休年齡');
+    return y>=25||(y>=5&&a>=voluntaryRetirementAge({indigenous}));
+  }
+
+  // 核定總年資（年／月／日）：資格判斷按日十足計算，不進位；
+  // 給與公式的畸零月數按比率計給，未滿一個月者以一個月計。
+  function certifiedTenureMonths({years=0,months=0,days=0}={}){
+    const y=wholeMonths(years,'核定年資的年'),m=wholeMonths(months,'核定年資的月'),d=wholeMonths(days,'核定年資的日');
+    if(m>11)throw new RangeError('核定年資的「月」須為 0 至 11。');
+    if(d>30)throw new RangeError('核定年資的「日」須為 0 至 30。');
+    const eligibilityMonths=y*12+m;
+    return Object.freeze({years:y,months:m,days:d,eligibilityMonths,benefitMonths:eligibilityMonths+(d>0?1:0)});
+  }
+
+  const RETIREMENT_CAUSES=Object.freeze(['voluntary','ordered','ordered-duty']);
+  const DUTY_TYPES=Object.freeze(['execution','other']);
+  const DISABILITY_LEVELS=Object.freeze(['none','half','full-selfcare','full-dependent']);
+  // 施行細則第 33 條：執行職務致失能者加發基數。
+  const DUTY_EXTRA_BASES=Object.freeze({none:0,half:5,'full-selfcare':10,'full-dependent':15});
+
+  // 命令退休的法定調整；資格一律由使用者依核定資料選擇，不自動推定。
+  function orderedRetirementAdjustments({cause='voluntary',dutyType='execution',disability='none'}={}){
+    if(!RETIREMENT_CAUSES.includes(cause))throw new RangeError(`未知退休事由：${cause}`);
+    if(cause==='voluntary')return Object.freeze({cause,ordered:false,duty:false,minServiceMonths:0,lumpFloorMonths:0,monthlyFloorMonths:0,extraLumpBases:0,ceilingExempt:false,startAgeExempt:false});
+    if(cause==='ordered')return Object.freeze({cause,ordered:true,duty:false,minServiceMonths:60,lumpFloorMonths:0,monthlyFloorMonths:0,extraLumpBases:0,ceilingExempt:false,startAgeExempt:true});
+    if(!DUTY_TYPES.includes(dutyType))throw new RangeError(`未知因公類別：${dutyType}`);
+    if(!DISABILITY_LEVELS.includes(disability))throw new RangeError(`未知失能程度：${disability}`);
+    const execution=dutyType==='execution';
+    return Object.freeze({
+      cause,ordered:true,duty:true,dutyType,disability,
+      minServiceMonths:0,          // 第 23 條：不受任職滿 5 年限制
+      lumpFloorMonths:60,          // 第 33 條第 1 項：一次退未滿 5 年以 5 年計
+      monthlyFloorMonths:240,      // 第 33 條第 1 項：月退未滿 20 年以 20 年計
+      extraLumpBases:execution?DUTY_EXTRA_BASES[disability]:0,   // 第 33 條第 2 項
+      ceilingExempt:execution||disability==='full-dependent',      // 第 33 條第 4 項
+      startAgeExempt:true
+    });
+  }
 
   const AVERAGE_SALARY_YEARS=Object.freeze({
     107:5,108:5,109:6,110:7,111:8,112:9,
@@ -106,7 +159,7 @@
     });
   }
 
-  function calculateFundPension({years,averageSalary,finalSalary}){
+  function calculateFundPension({years,averageSalary,finalSalary,ceilingExempt=false}){
     const average=nonNegative(averageSalary,'平均薪額');
     const final=nonNegative(finalSalary,'最後在職薪額');
     const monthlyRate=fundMonthlyPensionRate(years);
@@ -123,7 +176,8 @@
       incomeReplacementRate,
       statutoryMonthly,
       replacementCeiling,
-      monthly:Math.min(statutoryMonthly,replacementCeiling),
+      ceilingExempt:Boolean(ceilingExempt),
+      monthly:ceilingExempt?statutoryMonthly:Math.min(statutoryMonthly,replacementCeiling),
       lumpBases,
       lump:baseContents.fund*lumpBases
     });
@@ -231,7 +285,8 @@
     fundMonthly=0,
     finalSalary,
     totalCreditedMonths,
-    monthlyShare=1
+    monthlyShare=1,
+    exempt=false
   }){
     const preferential=nonNegative(preferentialInterest,'每月優惠存款利息');
     const legacy=nonNegative(legacyMonthly,'舊制月退休金');
@@ -243,7 +298,7 @@
     const rate=replacementRate(months/12);
     const ceiling=final*2*rate*share;
     const before=preferential+legacy+fund;
-    let excess=Math.max(0,before-ceiling);
+    let excess=exempt?0:Math.max(0,before-ceiling);
     const preferentialDeduction=Math.min(preferential,excess);excess-=preferentialDeduction;
     const legacyDeduction=Math.min(legacy,excess);excess-=legacyDeduction;
     const fundDeduction=Math.min(fund,excess);excess-=fundDeduction;
@@ -259,7 +314,7 @@
       fundMonthly:fund-fundDeduction,
       total:before-deductions.total
     });
-    return Object.freeze({rate,monthlyShare:share,ceiling,before,deductions,after,unresolvedExcess:excess});
+    return Object.freeze({rate,monthlyShare:share,ceiling,before,deductions,after,unresolvedExcess:excess,exempt:Boolean(exempt)});
   }
 
   function calculateMixedPensionCandidate({
@@ -269,7 +324,8 @@
     benefitType='monthly',
     preferentialInterest=0,
     qualifiedForMonthlyBefore2018=false,
-    specialLongServiceTeacher=false
+    specialLongServiceTeacher=false,
+    ceilingExempt=false
   }){
     if(!selection||typeof selection!=='object')throw new TypeError('必須提供年資選擇。');
     const legacyMonths=wholeMonths(selection.legacyMonths,'選用舊制年資');
@@ -301,7 +357,8 @@
       fundMonthly:fund.monthly,
       finalSalary,
       totalCreditedMonths:totalMonths,
-      monthlyShare
+      monthlyShare,
+      exempt:ceilingExempt
     }):null;
     return Object.freeze({
       eligible:true,
@@ -334,6 +391,14 @@
   return Object.freeze({
     RULES_VERSION,
     LEGAL_RULES,
+    ACT_EFFECTIVE_MONTH,
+    RETIREMENT_CAUSES,
+    DUTY_EXTRA_BASES,
+    isBeforeActEffective,
+    voluntaryRetirementAge,
+    isVoluntaryRetirementEligible,
+    certifiedTenureMonths,
+    orderedRetirementAdjustments,
     AVERAGE_SALARY_YEARS,
     averageSalaryYears,
     replacementRate,

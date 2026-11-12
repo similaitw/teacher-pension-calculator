@@ -70,3 +70,45 @@ test('已領退離給與期間鎖定不採計並同步明細與報表',async({pa
   await expect(page.locator('#leaveData')).toContainText('不採計（已領給與）');
   await expect(page.locator('#pendingItems')).toContainText('已領退離給與期間是否已依規定繳回');
 });
+
+test('原住民身分把自願退休年齡降為 55 歲',async({page})=>{
+  await page.goto('/');
+  await page.locator('.remove-leave').click();
+  await page.locator('.remove-education').click();
+  await page.locator('#startY').selectOption('105');
+  await page.locator('#retireY').selectOption('121');
+  await page.locator('#retireM').selectOption('12');
+  await expect(page.locator('#eligibility')).toHaveText('可能尚未符合一般自願退休條件');
+  await page.locator('#indigenous').check();
+  await expect(page.locator('#eligibility')).toHaveText('符合一般自願退休年資／年齡條件（原住民 55 歲）');
+});
+
+test('因公傷病命令退休：起支不受年齡限制、加發基數與所得上限排除',async({page})=>{
+  await page.goto('/');
+  await page.locator('#retireY').selectOption('115');
+  await page.locator('#retirementCause').selectOption('ordered-duty');
+  await expect(page.locator('#retirementModeGroup')).toBeHidden();
+  await page.locator('#disabilityLevel').selectOption('half');
+  await expect(page.locator('#comparisonRows tr')).toHaveCount(3);
+  await expect(page.locator('#comparisonRows')).toContainText('月退｜命令');
+  await expect(page.locator('#breakdownList')).toContainText('因公加發 5 個基數');
+  await expect(page.locator('#breakdownList')).toContainText('不適用（第 33 條第 4 項）');
+  await expect(page.locator('#primaryUnit')).toContainText('因公命令退休、退休生效日起');
+  await page.goto('/report.html');
+  await expect(page.locator('#pendingItems')).toContainText('因公傷病認定');
+});
+
+test('核定總年資覆寫：資格按日、給與畸零日以一個月計',async({page})=>{
+  await page.goto('/');
+  await page.locator('#certifiedTotalY').fill('30');
+  await page.locator('#certifiedTotalD').fill('15');
+  await expect(page.locator('#creditedTenure')).toHaveText('30 年 1 月');
+  await expect(page.locator('#breakdownList')).toContainText('資格 360 個月、給與 361 個月');
+});
+
+test('特殊長期服務 81 基數／95% 只限 107/7/1 前退休生效',async({page})=>{
+  await page.goto('/');
+  await page.locator('#hasLegacy').check();
+  await expect(page.locator('#specialLongService')).toBeDisabled();
+  await expect(page.locator('#specialLongServiceHint')).toContainText('目前退休年月不適用');
+});

@@ -148,3 +148,9 @@ body:not(.report-page) .live-bar.has-error{border-color:#f0a58f;background:linea
 }
 /* 已領退離給與期間：鎖定不採計 */
 .leave-item.is-received-benefit{border-left:4px solid var(--red);background:#fbf1ee}.leave-item.is-received-benefit .credit-toggle{opacity:.55;cursor:not-allowed}
+/* 特殊身分、核定年資與退休事由 */
+.special-status{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:22px;align-items:start}.inline-number.ymd{grid-template-columns:1fr auto 1fr auto 1fr auto}.special-status small{display:block;color:var(--muted);font-size:11px;margin-top:6px;line-height:1.5}
+.flag-check{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--cream);cursor:pointer}.flag-check input{width:18px;height:18px;margin-top:3px;flex:none;accent-color:var(--forest)}.flag-check b{display:block;font-size:13px}
+.cause-group{display:grid;gap:12px}.duty-fields{display:grid;grid-template-columns:1fr 1fr;gap:14px}.cause-hint{color:var(--muted);font-size:11px;line-height:1.5}
+.legacy-flags input:disabled+span{opacity:.6}
+@media(max-width:640px){.special-status,.duty-fields{grid-template-columns:1fr}}
