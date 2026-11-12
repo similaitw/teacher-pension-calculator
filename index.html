@@ -113,7 +113,7 @@
             <button type="button" class="add-education" id="addEducation"><span>＋</span>新增碩士／博士改敘</button>
             <p class="education-hint">改敘當下受新學歷最高本薪限制；之後再依考核晉至年功薪上限。碩士最高年功薪 650、博士 680。</p>
           </div>
-          <label class="field compact"><span>可併計的到職前年資</span><div class="inline-number"><input id="priorYears" type="number" min="0" max="50" step="1" value="0"><span>年</span><input id="priorMonths" type="number" min="0" max="11" step="1" value="0"><span>月</span></div><small>例如已完成補繳的代理、兵役或其他依法可併計年資；不確定請填 0。</small></label>
+          <label class="field compact"><span>可併計的到職前年資</span><div class="inline-number"><input id="priorYears" type="number" min="0" max="50" step="1" value="0"><span>年</span><input id="priorMonths" type="number" min="0" max="11" step="1" value="0"><span>月</span></div><small>例如已完成補繳的代理、兵役或其他依法可併計年資；已領退休、資遣或離職退費的年資不得填入。不確定請填 0。</small></label>
         </div>
       </section>
 
@@ -121,16 +121,16 @@
         <div class="section-index">03</div>
         <div class="section-body">
           <div class="section-heading">
-            <div><p class="eyebrow">關鍵差異</p><h2>留職停薪期間</h2></div>
-            <p>每一段分開登錄。只有依法得繳付且已選擇繼續／遞延／完成補繳的期間，才勾選「採計」。</p>
+            <div><p class="eyebrow">關鍵差異</p><h2>留職停薪與已領給與期間</h2></div>
+            <p>每一段分開登錄。只有依法得繳付且已選擇繼續／遞延／完成補繳的期間，才勾選「採計」；曾領退休、資遣或離職退費的期間一律不採計。</p>
           </div>
           <div class="rule-strip">
             <div><b>可採計</b><span>依法繼續、遞延或完成繳付退撫費用</span></div>
-            <div><b>不採計</b><span>停止繳付，或該事由依法不得補繳</span></div>
+            <div><b>不採計</b><span>停止繳付、依法不得補繳，或已領退離給與</span></div>
           </div>
           <div id="leaveList" class="leave-list"></div>
-          <button type="button" class="add-leave" id="addLeave"><span>＋</span>新增一段留職停薪</button>
-          <div class="legal-caution"><strong>先看文件，再決定是否採計。</strong>育嬰（及符合規定的育孫）、服義務役或特定借調等事由的規則不同；單純「曾經留停」不代表一定能算年資。</div>
+          <button type="button" class="add-leave" id="addLeave"><span>＋</span>新增一段期間</button>
+          <div class="legal-caution"><strong>先看文件，再決定是否採計。</strong>育嬰（及符合規定的育孫）、服義務役或特定借調等事由的規則不同；單純「曾經留停」不代表一定能算年資。已領給與的年資若已依規定繳回，請依核定資料改登錄為可採計。</div>
         </div>
       </section>
 
@@ -182,7 +182,7 @@
       <div class="result-hero"><p id="primaryLabel">每月退休金估計</p><strong id="primaryValue">—</strong><span id="primaryUnit">元／月</span></div>
       <div class="tenure-equation">
         <div><span>曆年任職</span><strong id="rawTenure">—</strong></div><i>−</i>
-        <div class="deduct"><span>不採計留停</span><strong id="leaveDeduct">—</strong></div><i>＋</i>
+        <div class="deduct"><span>不採計期間</span><strong id="leaveDeduct">—</strong></div><i>＋</i>
         <div><span>另可併計</span><strong id="priorTenure">—</strong></div><i>=</i>
         <div class="total"><span>可採計年資</span><strong id="creditedTenure">—</strong></div>
       </div>
@@ -214,7 +214,7 @@
       </section>
       <div class="breakdown"><h3>計算依據</h3><dl id="breakdownList"></dl></div>
       <details class="salary-audit"><summary>查看年度薪級推估軌跡</summary><div id="salaryTimelineList"></div></details>
-      <div class="leave-audit"><div><h3>留停採計明細</h3><p>期間若重疊，系統只計算一次。</p></div><div id="leaveAuditList"></div></div>
+      <div class="leave-audit"><div><h3>留停與已領給與明細</h3><p>期間若重疊，系統只計算一次。</p></div><div id="leaveAuditList"></div></div>
       <div class="result-warning">本結果是規劃用估值，不是退休審定。留停能否採計，仍以服務學校、人事主管機關及退撫基金管理機關的認定與繳費紀錄為準。</div>
     </section>
 
@@ -237,11 +237,11 @@
   <template id="leaveTemplate">
     <article class="leave-item">
       <div class="leave-number">留停 <span></span></div>
-      <label><span>事由</span><select class="leave-reason"><option>育嬰</option><option>育孫</option><option>服兵役</option><option>侍親</option><option>借調／國外服務</option><option>進修</option><option>其他</option></select></label>
+      <label><span>事由</span><select class="leave-reason"><option>育嬰</option><option>育孫</option><option>服兵役</option><option>侍親</option><option>借調／國外服務</option><option>進修</option><option>其他</option><optgroup label="已領退離給與（不得重複採計）"><option>曾領退休金</option><option>曾領資遣給與</option><option>曾領離職退費</option></optgroup></select></label>
       <fieldset><legend>起始年月</legend><div class="roc-date"><input class="leave-start-y" inputmode="numeric" placeholder="民國年" aria-label="留停起始民國年"><span>年</span><input class="leave-start-m" inputmode="numeric" placeholder="月" aria-label="留停起始月"><span>月</span></div></fieldset>
       <fieldset><legend>結束年月</legend><div class="roc-date"><input class="leave-end-y" inputmode="numeric" placeholder="民國年" aria-label="留停結束民國年"><span>年</span><input class="leave-end-m" inputmode="numeric" placeholder="月" aria-label="留停結束月"><span>月</span></div></fieldset>
       <label class="credit-toggle"><input class="leave-credited" type="checkbox"><span><b>這段採計退休年資</b><small>已繼續、遞延或完成繳付退撫費用</small></span></label>
-      <button class="remove-leave" type="button" aria-label="刪除此留停期間">移除</button>
+      <button class="remove-leave" type="button" aria-label="刪除此期間">移除</button>
     </article>
   </template>
   <template id="educationTemplate">

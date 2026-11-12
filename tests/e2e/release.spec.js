@@ -50,3 +50,23 @@ test('首頁沒有嚴重無障礙問題且靜態資源維持輕量',async({page}
   const resourceBytes=await page.evaluate(()=>performance.getEntriesByType('resource').reduce((sum,item)=>sum+(item.transferSize||0),0));
   expect(resourceBytes).toBeLessThan(500000);
 });
+
+test('已領退離給與期間鎖定不採計並同步明細與報表',async({page})=>{
+  await page.goto('/');
+  const before=await page.locator('#creditedTenure').textContent();
+  await page.locator('#addLeave').click();
+  const item=page.locator('.leave-item').last();
+  await item.locator('.leave-reason').selectOption('曾領資遣給與');
+  await expect(item.locator('.leave-credited')).toBeDisabled();
+  await expect(item.locator('.leave-credited')).not.toBeChecked();
+  await item.locator('.leave-start-y').fill('100');
+  await item.locator('.leave-start-m').fill('8');
+  await item.locator('.leave-end-y').fill('101');
+  await item.locator('.leave-end-m').fill('7');
+  await expect(page.locator('#leaveAuditList')).toContainText('不採計（已領給與）');
+  await expect(page.locator('#leaveSummary')).toContainText('另有已領給與 1 年');
+  await expect(page.locator('#creditedTenure')).not.toHaveText(before);
+  await page.goto('/report.html');
+  await expect(page.locator('#leaveData')).toContainText('不採計（已領給與）');
+  await expect(page.locator('#pendingItems')).toContainText('已領退離給與期間是否已依規定繳回');
+});
