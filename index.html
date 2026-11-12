@@ -69,7 +69,7 @@
             <fieldset class="preferential-card"><legend>核定優惠存款資料</legend><div class="preferential-mode" role="radiogroup" aria-label="優惠存款輸入方式"><label><input type="radio" name="preferentialInputMode" value="monthlyInterest" checked><span><b>輸入核定月息</b><small>直接使用核定的每月利息</small></span></label><label><input type="radio" name="preferentialInputMode" value="principal"><span><b>輸入核定本金</b><small>再搭配核定年利率換算</small></span></label></div><div id="preferentialMonthlyFields" class="preferential-fields"><label class="field"><span>每月核定優存利息</span><input id="preferentialInterest" type="number" min="0" step="100" value="0"><small>沒有正式核定值請填 0。</small></label></div><div id="preferentialPrincipalFields" class="preferential-fields two" hidden><label class="field"><span>核定優惠存款本金</span><input id="preferentialPrincipal" type="number" min="0" step="10000" value="0"></label><label class="field"><span>核定年利率</span><div class="inline-number"><input id="preferentialAnnualRate" type="number" min="0" max="100" step="0.01" value="0"><span>%</span></div></label></div><p>只接受主管機關正式核定資料；本工具不自動判斷資格、本金上限或利率。本金模式僅做「本金 × 核定年利率 ÷ 12」換算。</p></fieldset>
             <div class="legacy-flags">
               <label><input id="qualifiedBefore2018" type="checkbox"><span>107/7/1 前已符合月退資格<small>勾選後改採最後在職薪額基準</small></span></label>
-              <label><input id="specialLongService" type="checkbox"><span>具特殊長期服務教師／校長資格<small>須有主管機關認定，不會自動判斷</small></span></label>
+              <label><input id="specialLongService" type="checkbox"><span>具特殊長期服務教師／校長資格<small id="specialLongServiceHint">限本條例施行（107 年 7 月 1 日）前退休生效者（第 15 條第 2 項）</small></span></label>
             </div>
             <p class="legacy-footnote">其他可併計年資目前歸入基金制；跨公務、政務或軍職的舊制年資，請優先輸入正式核定舊制月數。</p>
           </div>
@@ -84,9 +84,9 @@
             <p>日期以民國年月輸入；退休年月視為該月起退休。</p>
           </div>
           <div class="field-grid three">
-            <fieldset class="field"><legend>出生年月</legend><div class="roc-date"><input id="birthY" inputmode="numeric" value="65" aria-label="出生民國年"><span>年</span><input id="birthM" inputmode="numeric" value="12" aria-label="出生月"><span>月</span></div></fieldset>
-            <fieldset class="field"><legend>正式到職年月</legend><div class="roc-date"><input id="startY" inputmode="numeric" value="88" aria-label="到職民國年"><span>年</span><input id="startM" inputmode="numeric" value="8" aria-label="到職月"><span>月</span></div></fieldset>
-            <fieldset id="retirementField" class="field"><legend>預計退休年月</legend><div class="roc-date"><input id="retireY" type="number" min="1" max="130" step="1" value="124" aria-label="退休民國年" aria-describedby="retirementLimitHint"><span>年</span><input id="retireM" type="number" min="1" max="12" step="1" value="8" aria-label="退休月" aria-describedby="retirementLimitHint"><span>月</span></div><small id="retirementLimitHint" class="retirement-limit-hint">最晚可填至年滿 65 歲當月。</small></fieldset>
+            <fieldset class="field"><legend>出生年月</legend><div class="roc-date"><select id="birthY" aria-label="出生民國年"></select><span>年</span><select id="birthM" aria-label="出生月"></select><span>月</span></div></fieldset>
+            <fieldset class="field"><legend>正式到職年月</legend><div class="roc-date"><select id="startY" aria-label="到職民國年"></select><span>年</span><select id="startM" aria-label="到職月"></select><span>月</span></div></fieldset>
+            <fieldset id="retirementField" class="field"><legend>預計退休年月</legend><div class="roc-date"><select id="retireY" aria-label="退休民國年" aria-describedby="retirementLimitHint"></select><span>年</span><select id="retireM" aria-label="退休月" aria-describedby="retirementLimitHint"></select><span>月</span></div><small id="retirementLimitHint" class="retirement-limit-hint">最晚可填至年滿 65 歲當月。</small></fieldset>
           </div>
           <div class="field-grid salary-row">
             <label class="field"><span>初任時學歷</span><select id="education"><option value="bachelor" selected>大學</option><option value="credit40">40 學分班</option><option value="master">碩士</option><option value="phd">博士</option></select></label>
@@ -113,7 +113,11 @@
             <button type="button" class="add-education" id="addEducation"><span>＋</span>新增碩士／博士改敘</button>
             <p class="education-hint">改敘當下受新學歷最高本薪限制；之後再依考核晉至年功薪上限。碩士最高年功薪 650、博士 680。</p>
           </div>
-          <label class="field compact"><span>可併計的到職前年資</span><div class="inline-number"><input id="priorYears" type="number" min="0" max="50" step="1" value="0"><span>年</span><input id="priorMonths" type="number" min="0" max="11" step="1" value="0"><span>月</span></div><small>例如已完成補繳的代理、兵役或其他依法可併計年資；不確定請填 0。</small></label>
+          <label class="field compact"><span>可併計的到職前年資</span><div class="inline-number"><input id="priorYears" type="number" min="0" max="50" step="1" value="0"><span>年</span><input id="priorMonths" type="number" min="0" max="11" step="1" value="0"><span>月</span></div><small>例如已完成補繳的代理、兵役或其他依法可併計年資；已領退休、資遣或離職退費的年資不得填入。不確定請填 0。</small></label>
+          <div class="special-status">
+            <label class="field"><span>主管機關核定退休總年資（選填）</span><div class="inline-number ymd"><input id="certifiedTotalY" type="number" min="0" max="50" step="1" value="0" aria-label="核定總年資年"><span>年</span><input id="certifiedTotalM" type="number" min="0" max="11" step="1" value="0" aria-label="核定總年資月"><span>月</span><input id="certifiedTotalD" type="number" min="0" max="30" step="1" value="0" aria-label="核定總年資日"><span>日</span></div><small>有核定資料時覆寫系統推算的總年資；全部為 0 表示不覆寫。退休資格按日計算，給與公式的畸零日數未滿一個月以一個月計。</small></label>
+            <label class="flag-check"><input id="indigenous" type="checkbox"><span><b>具原住民身分</b><small>自願退休年齡由 60 歲降為 55 歲（第 18 條，依戶籍登載認定）；月退休金起支年齡不因此改變。</small></span></label>
+          </div>
         </div>
       </section>
 
@@ -121,16 +125,16 @@
         <div class="section-index">03</div>
         <div class="section-body">
           <div class="section-heading">
-            <div><p class="eyebrow">關鍵差異</p><h2>留職停薪期間</h2></div>
-            <p>每一段分開登錄。只有依法得繳付且已選擇繼續／遞延／完成補繳的期間，才勾選「採計」。</p>
+            <div><p class="eyebrow">關鍵差異</p><h2>留職停薪與已領給與期間</h2></div>
+            <p>每一段分開登錄。只有依法得繳付且已選擇繼續／遞延／完成補繳的期間，才勾選「採計」；曾領退休、資遣或離職退費的期間一律不採計。</p>
           </div>
           <div class="rule-strip">
             <div><b>可採計</b><span>依法繼續、遞延或完成繳付退撫費用</span></div>
-            <div><b>不採計</b><span>停止繳付，或該事由依法不得補繳</span></div>
+            <div><b>不採計</b><span>停止繳付、依法不得補繳，或已領退離給與</span></div>
           </div>
           <div id="leaveList" class="leave-list"></div>
-          <button type="button" class="add-leave" id="addLeave"><span>＋</span>新增一段留職停薪</button>
-          <div class="legal-caution"><strong>先看文件，再決定是否採計。</strong>育嬰（及符合規定的育孫）、服義務役或特定借調等事由的規則不同；單純「曾經留停」不代表一定能算年資。</div>
+          <button type="button" class="add-leave" id="addLeave"><span>＋</span>新增一段期間</button>
+          <div class="legal-caution"><strong>先看文件，再決定是否採計。</strong>育嬰（及符合規定的育孫）、服義務役或特定借調等事由的規則不同；單純「曾經留停」不代表一定能算年資。已領給與的年資若已依規定繳回，請依核定資料改登錄為可採計。</div>
         </div>
       </section>
 
@@ -149,6 +153,14 @@
               <label class="choice-card selected"><input type="radio" name="benefitType" value="monthly" checked><strong>月退</strong><small>全額月退休金</small></label>
             </div>
           </div>
+          <div id="retirementCauseGroup" class="choice-group fund-only cause-group">
+            <label class="field"><span class="choice-label">退休事由</span><select id="retirementCause"><option value="voluntary" selected>自願或屆齡退休</option><option value="ordered">命令退休（身心傷病或障礙，第 22 條）</option><option value="ordered-duty">因公傷病命令退休（第 23 條）</option></select></label>
+            <div id="dutyFields" class="duty-fields" hidden>
+              <label class="field"><span>因公類別</span><select id="dutyType"><option value="execution">執行職務發生意外、暴力或疾病</option><option value="other">辦公場所、公差途中、猝發疾病或積勞過度</option></select></label>
+              <label class="field"><span>核定失能程度</span><select id="disabilityLevel"><option value="none">未達失能標準或尚未核定</option><option value="half">半失能</option><option value="full-selfcare">全失能，日常生活尚能自理</option><option value="full-dependent">全失能，全身癱瘓或日常生活無法自理</option></select></label>
+            </div>
+            <small id="causeHint" class="cause-hint">命令退休須由服務學校主動申辦並經主管機關審定；本工具不會自動判斷資格。</small>
+          </div>
           <div id="retirementModeGroup" class="choice-group fund-only">
             <span class="choice-label">退休／月退起領情境</span>
             <div class="mode-switch" role="radiogroup" aria-label="退休與月退休金起領情境">
@@ -158,7 +170,7 @@
               <label class="choice-card"><input type="radio" name="retirementMode" value="mandatory"><strong>屆齡退休</strong><small>一般為年滿 65 歲</small></label>
             </div>
           </div>
-          <div id="choiceHint" class="legal-caution">高級中等以下學校校長及教師的一般全額月退休金起支年齡以 58 歲估算；特殊身分、命令退休及原住民規定未納入自動判斷。</div>
+          <div id="choiceHint" class="legal-caution">高級中等以下學校校長及教師的一般全額月退休金起支年齡以 58 歲估算；原住民身分只影響自願退休年齡，不影響月退起支年齡。</div>
         </div>
       </section>
 
@@ -182,7 +194,7 @@
       <div class="result-hero"><p id="primaryLabel">每月退休金估計</p><strong id="primaryValue">—</strong><span id="primaryUnit">元／月</span></div>
       <div class="tenure-equation">
         <div><span>曆年任職</span><strong id="rawTenure">—</strong></div><i>−</i>
-        <div class="deduct"><span>不採計留停</span><strong id="leaveDeduct">—</strong></div><i>＋</i>
+        <div class="deduct"><span>不採計期間</span><strong id="leaveDeduct">—</strong></div><i>＋</i>
         <div><span>另可併計</span><strong id="priorTenure">—</strong></div><i>=</i>
         <div class="total"><span>可採計年資</span><strong id="creditedTenure">—</strong></div>
       </div>
@@ -214,7 +226,7 @@
       </section>
       <div class="breakdown"><h3>計算依據</h3><dl id="breakdownList"></dl></div>
       <details class="salary-audit"><summary>查看年度薪級推估軌跡</summary><div id="salaryTimelineList"></div></details>
-      <div class="leave-audit"><div><h3>留停採計明細</h3><p>期間若重疊，系統只計算一次。</p></div><div id="leaveAuditList"></div></div>
+      <div class="leave-audit"><div><h3>留停與已領給與明細</h3><p>期間若重疊，系統只計算一次。</p></div><div id="leaveAuditList"></div></div>
       <div class="result-warning">本結果是規劃用估值，不是退休審定。留停能否採計，仍以服務學校、人事主管機關及退撫基金管理機關的認定與繳費紀錄為準。</div>
     </section>
 
@@ -233,15 +245,15 @@
       </div>
     </section>
   </main>
-  <footer><span>教師退休試算 · 獨立前端工具</span><span>版本 1.1 · 2026.08</span></footer>
+  <footer><span>教師退休試算 · 獨立前端工具</span><span>版本 2.0 RC · 2026.08</span></footer>
   <template id="leaveTemplate">
     <article class="leave-item">
       <div class="leave-number">留停 <span></span></div>
-      <label><span>事由</span><select class="leave-reason"><option>育嬰</option><option>育孫</option><option>服兵役</option><option>侍親</option><option>借調／國外服務</option><option>進修</option><option>其他</option></select></label>
+      <label><span>事由</span><select class="leave-reason"><option>育嬰</option><option>育孫</option><option>服兵役</option><option>侍親</option><option>借調／國外服務</option><option>進修</option><option>其他</option><optgroup label="已領退離給與（不得重複採計）"><option>曾領退休金</option><option>曾領資遣給與</option><option>曾領離職退費</option></optgroup></select></label>
       <fieldset><legend>起始年月</legend><div class="roc-date"><input class="leave-start-y" inputmode="numeric" placeholder="民國年" aria-label="留停起始民國年"><span>年</span><input class="leave-start-m" inputmode="numeric" placeholder="月" aria-label="留停起始月"><span>月</span></div></fieldset>
       <fieldset><legend>結束年月</legend><div class="roc-date"><input class="leave-end-y" inputmode="numeric" placeholder="民國年" aria-label="留停結束民國年"><span>年</span><input class="leave-end-m" inputmode="numeric" placeholder="月" aria-label="留停結束月"><span>月</span></div></fieldset>
       <label class="credit-toggle"><input class="leave-credited" type="checkbox"><span><b>這段採計退休年資</b><small>已繼續、遞延或完成繳付退撫費用</small></span></label>
-      <button class="remove-leave" type="button" aria-label="刪除此留停期間">移除</button>
+      <button class="remove-leave" type="button" aria-label="刪除此期間">移除</button>
     </article>
   </template>
   <template id="educationTemplate">

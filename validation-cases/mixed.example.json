@@ -1,0 +1,8 @@
+{
+  "id": "請填無個資案例代號",
+  "category": "mixed",
+  "source": { "document": "請填正式審定或人事試算來源代稱", "anonymized": false },
+  "input": { "legacyMonths": 0, "fundMonths": 0, "accountMonths": 0, "averageSalary": 0, "finalSalary": 0, "preferentialInterest": 0, "qualifiedForMonthlyBefore2018": false, "specialLongServiceTeacher": false },
+  "expected": { "creditedMonths": 0, "legacyMonths": 0, "fundMonths": 0, "accountMonths": 0, "averageSalary": 0, "finalSalary": 0, "lump": 0, "monthly": 0, "totalDeduction": 0 },
+  "tolerance": { "money": 1, "months": 0 }
+}
