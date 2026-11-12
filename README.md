@@ -31,6 +31,14 @@ npx playwright install chromium
 npm run test:release
 ```
 
+端到端測試預設使用 4173 埠，且不沿用既有伺服器；若該埠被其他程式佔用會直接報錯。可改用其他埠：
+
+```powershell
+$env:E2E_PORT=4199; npm run test:e2e
+```
+
+已手動啟動本站時，可設 `$env:E2E_REUSE_SERVER=1` 沿用。
+
 正式版另須將三類去識別化正式案例放入 `validation-cases/`，再執行：
 
 ```powershell
