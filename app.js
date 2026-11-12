@@ -43,7 +43,14 @@ function fillDateSelects(){
   };
   fillYearSelect('birthY',1,130,65);fillMonthSelect('birthM',12);
   fillYearSelect('startY',1,130,88);fillMonthSelect('startM',8);
-  fillYearSelect('retireY',1,130,124);fillMonthSelect('retireM',8);
+  fillYearSelect('retireY',1,130,124);fillMonthSelect('retireM',8);updateRetireYearOptions();
+}
+// 退休年份上限隨出生年調整：最晚至年滿 65 歲那一年（當月限制由 updateRetirementLimit 檢查）。
+function updateRetireYearOptions(){
+  const birthY=Number($('birthY').value),select=$('retireY'),current=Number(select.value),maxYear=birthY?birthY+65:200,minYear=Math.max(1,maxYear-65);
+  if(Number(select.options[0]?.value)===maxYear&&Number(select.options[select.options.length-1]?.value)===minYear)return;
+  select.innerHTML='';for(let y=maxYear;y>=minYear;y--){const o=document.createElement('option');o.value=y;o.textContent=`${y} 年`;select.append(o);}
+  select.value=String(Math.min(maxYear,Math.max(minYear,current||maxYear)));
 }
 function updateSalary(){$('salaryAmount').textContent=`${fmt(SALARY[$('salaryPoint').value])} 元`;}
 function pointOptions(select,target,selected=''){
@@ -392,7 +399,7 @@ document.querySelectorAll('[name=preferentialInputMode]').forEach(r=>r.addEventL
 $('salaryPoint').addEventListener('change',updateSalary);$('addEducation').addEventListener('click',()=>addEducation());$('addLeave').addEventListener('click',()=>addLeave());
 $('voluntary').addEventListener('input',e=>$('voluntaryOut').textContent=Number(e.target.value).toFixed(2)+'%');$('returnRate').addEventListener('input',e=>$('returnOut').textContent=Number(e.target.value).toFixed(2)+'%');
 let liveTimer;function scheduleLive(){clearTimeout(liveTimer);$('liveBar').classList.add('is-updating');liveTimer=setTimeout(()=>calculate(null,{scroll:false}),180);}
-$('calculator').addEventListener('submit',e=>calculate(e,{scroll:true}));$('calculator').addEventListener('input',e=>{if(['birthY','birthM','retireY','retireM'].includes(e.target.id)){updateRetirementLimit();autoSelectRetirementMode();updateLegacyUI()}scheduleLive()});$('calculator').addEventListener('change',scheduleLive);$('editAgain').addEventListener('click',()=>$('calculator').scrollIntoView({behavior:'smooth'}));
+$('calculator').addEventListener('submit',e=>calculate(e,{scroll:true}));$('calculator').addEventListener('input',e=>{if(['birthY','birthM','retireY','retireM'].includes(e.target.id)){if(e.target.id==='birthY')updateRetireYearOptions();updateRetirementLimit();autoSelectRetirementMode();updateLegacyUI()}scheduleLive()});$('calculator').addEventListener('change',scheduleLive);$('editAgain').addEventListener('click',()=>$('calculator').scrollIntoView({behavior:'smooth'}));
 $('earlyCompareAge').addEventListener('change',scheduleLive);$('lateCompareAge').addEventListener('change',scheduleLive);
 $('includeWorkIncome').addEventListener('change',scheduleLive);
 $('includeLumpReturn').addEventListener('change',()=>{updateReturnUI();scheduleLive()});$('lumpReturnRate').addEventListener('input',scheduleLive);

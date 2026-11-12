@@ -112,3 +112,15 @@ test('特殊長期服務 81 基數／95% 只限 107/7/1 前退休生效',async({
   await expect(page.locator('#specialLongService')).toBeDisabled();
   await expect(page.locator('#specialLongServiceHint')).toContainText('目前退休年月不適用');
 });
+
+test('退休年份選單隨出生年延伸至年滿 65 歲那一年',async({page})=>{
+  await page.goto('/');
+  await page.locator('#birthY').selectOption('75');
+  await expect(page.locator('#retireY option').first()).toHaveAttribute('value','140');
+  await expect(page.locator('#retireY')).toHaveValue('124');
+  await page.locator('#retireY').selectOption('140');
+  await page.locator('#retireM').selectOption('12');
+  await expect(page.locator('#retirementLimitHint')).toContainText('最晚民國 140 年 12 月');
+  await page.locator('#birthY').selectOption('60');
+  await expect(page.locator('#retireY')).toHaveValue('125');
+});
